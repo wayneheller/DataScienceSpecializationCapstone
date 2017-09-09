@@ -12,13 +12,17 @@
 # To remove profanity, puncuation, whitespace, etc.                            #
 # > myCorpus <- cleanCorpus(myCorpus, metadatadir)                             #
 #                                                                              #
+# To create a term document matrix of Bigrams                                  #
+# > myTdm <- tokenizeCorpus(myCorpus, ngram=2)                                 #
 ################################################################################
 
 library(tm)
+library("RWeka")
 
 # path variable names
 datadir <- file.path(getwd(), "data")
 sampledir <- file.path(datadir, "sampleddata")
+sampledirarchive <- file.path(datadir, "sampleddatearchive")
 metadatadir <- file.path(datadir, "metadata")
 
 # helper function to convert an ascii code to its character
@@ -60,8 +64,9 @@ sampleText <- function (filename, totalrows, sampleSize) {
 # Row counts were determined by opening file in a text editor
 # input is the full path to the directory containing the original corpus
 # output: a Corpus object
+# NOTE: will archive existing sample file first
 createSampleData <- function(datadir) {
-        sample.size <- 0.00001
+        sample.size <- 0.01
         samplefilename <- paste0("sampledata_samplesize_", as.character(sample.size), ".txt")
         
         file.news <- "en_US.news.txt"
@@ -83,9 +88,12 @@ createSampleData <- function(datadir) {
         
         
         # Remove existing sample file if it exists
-        if(file.exists(file.path(sampledir, samplefilename))) {
-                file.remove(file.path(sampledir, samplefilename))
-        }
+        #if(file.exists(file.path(sampledir, samplefilename))) {
+        #        file.remove(file.path(sampledir, samplefilename))
+        #}
+        
+        # Archive old sample file(s) if present
+        archive.sample(sampledir)
         
         # Create new sample file
         conn <- file(file.path(sampledir, samplefilename), open = "w", encoding = "UTF-8" )
@@ -97,9 +105,10 @@ createSampleData <- function(datadir) {
 # input: full path to the directory containing the sampled data file
 # output: a Corpus object
 openCorpus <- function(sampleDir) {
-        #txt <- system.file(sampleDir, "txt", package = "tm")
-        #print(txt)
-        myCorpus <- Corpus(DirSource(sampleDir, encoding = "UTF-8"),
+        # openning as a VCorpus vs. a simple one - there is an issue with the 
+        # ngramtokenizer not workings as desired.  See function tokenizeCorpus
+        # for more info
+        myCorpus <- VCorpus(DirSource(sampleDir, encoding = "UTF-8"),
                            readerControl = list(language = "lat"))
 
         return(myCorpus)
@@ -122,8 +131,11 @@ cleanCorpus <- function(myCorpus, metadataDir) {
         BannedWordFileName <- "full-list-of-bad-words-banned-by-google-txt-file_2013_11_26_04_53_31_867.txt"
         pathToBannedWordList <- file.path(metadataDir, BannedWordFileName)
         BandWords <- read.csv(pathToBannedWordList, sep="\t", strip.white = TRUE)
+        
+        print("Removing Banned Words...")
         # This file contains non-breaking whitespace that needs to be removed
-        myCorpus <- tm_map(myCorpus, removeWords, sapply(BandWords[, 1], removenbsp))
+        chrBandWords <- sapply(BandWords[, 1], removenbsp)
+        myCorpus <- tm_map(myCorpus, removeWords, chrBandWords)
         
         # This step is no longer needed since we remove all non-ASCII characters
         # when creating this file
@@ -131,8 +143,71 @@ cleanCorpus <- function(myCorpus, metadataDir) {
         # gsub("<U\\+\\d+>", "", x, fixed=FALSE)
         #myCorpus <- tm_map(myCorpus, removePattern, "<") 
         
-        # Step 3: Remove punctuation
+        # Step 3: Remove punctuation and numbers
+        print("Remvoing punctuation...")
         myCorpus <- tm_map(myCorpus, removePunctuation)
-
+        print("Remvoing numbers")
+        myCorpus <- tm_map(myCorpus, removeNumbers)
+        
+        # Step 4: Remove english stop words (Not sure we want to do this for the final project)
+        print("Remvoing stop words")
+        myCorpus <- tm_map(myCorpus, removeWords, stopwords(kind = "en"))
 }
 
+
+
+
+# This fuction returns a term document matrix for unigrams, bigrams, trigrams or some combination of these
+# inputs are a corpus, the desired ngram OR the min and max of the ngrams to return
+# in the case where min and max are specified, ngram term is ignored
+# default is to return unigrams
+tokenizeCorpus <- function(myCorpus, ngram= 1, minWords=0, maxWords=0) {
+        # There is an issue with verion 0.7 of tm that prevents bigram tokenization
+        # I currently have tm_0.7-1 installed
+        # https://stackoverflow.com/questions/42538223/ngramtokenizer-not-working-as-expected
+        # one solution it to revert tm to prior version, another solution is to
+        # open the corpus using VCorpus - I went with the later option
+        # https://stackoverflow.com/questions/43410491/2-gram-and-3-gram-instead-of-1-gram-using-rweka
+        
+        UnigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 1, max = 1))
+        BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
+        TrigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3))
+        
+        if ((minWords > 0) & (maxWords > minWords)) {
+                MultigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = minWords, max = maxWords))
+                tdm <- TermDocumentMatrix(myCorpus, control = list(tokenize = MultigramTokenizer)) 
+                }
+        else if (ngram == 1) {
+                tdm <- TermDocumentMatrix(myCorpus, control = list(tokenize = UnigramTokenizer))    
+        }
+        else if (ngram == 2){
+                tdm <- TermDocumentMatrix(myCorpus, control = list(tokenize = BigramTokenizer))
+        }
+        else if (ngram == 3){
+                tdm <- TermDocumentMatrix(myCorpus, control = list(tokenize = TrigramTokenizer))
+        }
+        
+        
+        
+        
+        #plot(tdm, terms = findFreqTerms(tdm, lowfreq = 2)[1:50], corThreshold = 0.5)  
+        
+        return(tdm)
+        
+}
+
+# Utility function to archive sampled files
+utility.file.rename <- function(from, to) {
+        todir <- dirname(to)
+        if (!isTRUE(file.info(todir)$isdir)) dir.create(todir, recursive=TRUE)
+        file.rename(from = from,  to = to)
+}
+
+# clean out sampledir in prep for creating a new one
+archive.sample <- function(sampleDir){
+        samplefiles <- list.files(sampleDir)
+        for (f in samplefiles) {
+                print(f)
+                utility.file.rename(file.path(sampleDir, f), file.path(sampledirarchive,f))
+        }
+}
