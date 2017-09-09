@@ -13,7 +13,7 @@
 # > myCorpus <- cleanCorpus(myCorpus, metadatadir)                             #
 #                                                                              #
 # To create a term document matrix of Bigrams                                  #
-# > myTdm <- tokenizeCorpus(myCorpus, ngram=2)                                 #
+# > myDtm <- tokenizeCorpus(myCorpus, ngram=2)                                 #
 ################################################################################
 
 library(tm)
@@ -21,6 +21,15 @@ library("RWeka")
 
 # path variable names
 datadir <- file.path(getwd(), "data")
+dir.data <- datadir
+dir.twitter <- file.path(dir.data, "tweats")
+dir.blog <- file.path(dir.data, "blogs")
+dir.news <- file.path(dir.data, "articles")
+
+file.news <- file.path(dir.data, "en_US.news.txt")
+file.blogs <- file.path(dir.data, "en_US.blogs.txt")
+file.twitter <- file.path(dir.data, "en_US.twitter.txt")
+
 sampledir <- file.path(datadir, "sampleddata")
 sampledirarchive <- file.path(datadir, "sampleddatearchive")
 metadatadir <- file.path(datadir, "metadata")
@@ -28,6 +37,31 @@ metadatadir <- file.path(datadir, "metadata")
 # helper function to convert an ascii code to its character
 #used by cleanCorpus()
 chr <- function(n) { rawToChar(as.raw(n)) }
+
+# extract each tweat, blog post and article as a separate document
+extractDocs <- function(sourcefilename, destdir, filenameprefix) {
+        
+        # create destination director if it doesn't exist
+        dir.create(destdir, showWarnings = FALSE)
+        
+        # open source file
+        conn <- file(sourcefilename, open = "rb") # open connection to the file using rb to deal with Cntl-Z in news file
+        
+        row <- 0 # initialize row counter
+        
+        # read each line of text and recreate file
+        while (length(oneLine <- readLines(conn, n = 1, warn = TRUE, skipNul = TRUE)) > 0) {
+                row <- row + 1
+                cn <- file(file.path(destdir, paste0(filenameprefix, "_", as.character(row), ".txt")), open = "w", encoding = "UTF-8" )
+                write(oneLine, cn)
+                close(cn)
+        }
+        
+        # close source file
+        close(conn)
+}
+
+
 
 # creates a sample dataset from a file
 # as inputs: the full path to the file, total number of rows in the file, 
@@ -160,7 +194,7 @@ cleanCorpus <- function(myCorpus, metadataDir) {
 # This fuction returns a term document matrix for unigrams, bigrams, trigrams or some combination of these
 # inputs are a corpus, the desired ngram OR the min and max of the ngrams to return
 # in the case where min and max are specified, ngram term is ignored
-# default is to return unigrams
+# default is to return unigrams as a Document Term Matrix
 tokenizeCorpus <- function(myCorpus, ngram= 1, minWords=0, maxWords=0) {
         # There is an issue with verion 0.7 of tm that prevents bigram tokenization
         # I currently have tm_0.7-1 installed
@@ -175,16 +209,16 @@ tokenizeCorpus <- function(myCorpus, ngram= 1, minWords=0, maxWords=0) {
         
         if ((minWords > 0) & (maxWords > minWords)) {
                 MultigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = minWords, max = maxWords))
-                tdm <- TermDocumentMatrix(myCorpus, control = list(tokenize = MultigramTokenizer)) 
+                dtm <- DocumentTermMatrix(myCorpus, control = list(tokenize = MultigramTokenizer)) 
                 }
         else if (ngram == 1) {
-                tdm <- TermDocumentMatrix(myCorpus, control = list(tokenize = UnigramTokenizer))    
+                dtm <- DocumentTermMatrix(myCorpus, control = list(tokenize = UnigramTokenizer))    
         }
         else if (ngram == 2){
-                tdm <- TermDocumentMatrix(myCorpus, control = list(tokenize = BigramTokenizer))
+                dtm <- DocumentTermMatrix(myCorpus, control = list(tokenize = BigramTokenizer))
         }
         else if (ngram == 3){
-                tdm <- TermDocumentMatrix(myCorpus, control = list(tokenize = TrigramTokenizer))
+                dtm <- DocumentTermMatrix(myCorpus, control = list(tokenize = TrigramTokenizer))
         }
         
         
@@ -192,7 +226,7 @@ tokenizeCorpus <- function(myCorpus, ngram= 1, minWords=0, maxWords=0) {
         
         #plot(tdm, terms = findFreqTerms(tdm, lowfreq = 2)[1:50], corThreshold = 0.5)  
         
-        return(tdm)
+        return(dtm)
         
 }
 
