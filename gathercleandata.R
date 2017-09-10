@@ -21,14 +21,6 @@ library("RWeka")
 
 # path variable names
 datadir <- file.path(getwd(), "data")
-dir.data <- datadir
-dir.twitter <- file.path(dir.data, "tweats")
-dir.blog <- file.path(dir.data, "blogs")
-dir.news <- file.path(dir.data, "articles")
-
-file.news <- file.path(dir.data, "en_US.news.txt")
-file.blogs <- file.path(dir.data, "en_US.blogs.txt")
-file.twitter <- file.path(dir.data, "en_US.twitter.txt")
 
 sampledir <- file.path(datadir, "sampleddata")
 sampledirarchive <- file.path(datadir, "sampleddatearchive")
@@ -37,31 +29,6 @@ metadatadir <- file.path(datadir, "metadata")
 # helper function to convert an ascii code to its character
 #used by cleanCorpus()
 chr <- function(n) { rawToChar(as.raw(n)) }
-
-# extract each tweat, blog post and article as a separate document
-extractDocs <- function(sourcefilename, destdir, filenameprefix) {
-        
-        # create destination director if it doesn't exist
-        dir.create(destdir, showWarnings = FALSE)
-        
-        # open source file
-        conn <- file(sourcefilename, open = "rb") # open connection to the file using rb to deal with Cntl-Z in news file
-        
-        row <- 0 # initialize row counter
-        
-        # read each line of text and recreate file
-        while (length(oneLine <- readLines(conn, n = 1, warn = TRUE, skipNul = TRUE)) > 0) {
-                row <- row + 1
-                cn <- file(file.path(destdir, paste0(filenameprefix, "_", as.character(row), ".txt")), open = "w", encoding = "UTF-8" )
-                write(oneLine, cn)
-                close(cn)
-        }
-        
-        # close source file
-        close(conn)
-}
-
-
 
 # creates a sample dataset from a file
 # as inputs: the full path to the file, total number of rows in the file, 

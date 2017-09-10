@@ -10,12 +10,28 @@
 # http://www.bioconductor.org/install/
 # source("https://bioconductor.org/biocLite.R"); bioLite("Rgraphviz")
 library(Rgraphviz)
+library(ggplot2)
 
 graphDtm <- function(myDtm, lowFreq = 2, topN = 50, corthreshold = 0.5) {
         
         m <- as.matrix(myDtm)
         v <- sort(colSums(m), decreasing=TRUE)
-        #print(names(v))
-        #plot(myDtm, terms = findFreqTerms(myDtm, lowfreq = lowFreq)[1:topN], corThreshold = corthreshold)
         plot(myDtm, terms = names(v)[1:topN], corThreshold = corthreshold)
-        }
+}
+
+barPlotFreq <- function(myDtm, topN = 10) {
+        # sort terms by decreasing frequency
+        m <- as.matrix(myDtm)
+        v <- sort(colSums(m), decreasing=TRUE)
+        
+        # convert to a dataframe for plotting
+        df <- data.frame(v)
+        # convert rownames to first column
+        names <- rownames(df)
+        rownames(df) <- NULL
+        df <- cbind(names,df)
+        
+        # rename columns and then plot as barchart
+        names(df) <- c("terms", "frequency")
+        ggplot(df[1:topN, ], aes(x=reorder(terms, frequency),y = frequency)) + xlab("terms") + geom_bar(stat = "identity") + coord_flip()
+}
