@@ -67,7 +67,7 @@ sampleText <- function (filename, totalrows, sampleSize) {
 # output: a Corpus object
 # NOTE: will archive existing sample file first
 createSampleData <- function(datadir) {
-        sample.size <- 0.01
+        sample.size <- 0.1
         samplefilename <- paste0("sampledata_samplesize_", as.character(sample.size), ".txt")
         
         file.news <- "en_US.news.txt"
@@ -112,6 +112,11 @@ openCorpus <- function(sampleDir) {
         myCorpus <- VCorpus(DirSource(sampleDir, encoding = "UTF-8"),
                            readerControl = list(language = "lat"))
 
+        # add meta data tag
+        sample.size <- getSampleSize(sampleDir)
+        
+        meta(myCorpus, "SampleSize") <- sample.size
+        
         return(myCorpus)
 }
 
@@ -211,4 +216,15 @@ archive.sample <- function(sampleDir){
                 print(f)
                 utility.file.rename(file.path(sampleDir, f), file.path(sampledirarchive,f))
         }
+}
+getSampleSize <- function(sampleDir) {
+        if (file.exists(file.path(sampleDir, "sampledata_samplesize_0.01.txt"))) {
+                sample.size <- "1%"
+        }
+        if (file.exists(file.path(sampleDir, "sampledata_samplesize_0.1.txt"))) {
+                sample.size <- "10%"
+        }
+        else sample.size < "Unknown"
+        
+        return(sample.size)
 }

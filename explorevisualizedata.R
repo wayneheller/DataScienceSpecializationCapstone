@@ -19,7 +19,7 @@ graphDtm <- function(myDtm, lowFreq = 2, topN = 50, corthreshold = 0.5) {
         plot(myDtm, terms = names(v)[1:topN], corThreshold = corthreshold)
 }
 
-barPlotFreq <- function(myDtm, topN = 10) {
+barPlotFreq <- function(myDtm, topN = 10, sample.size) {
         # sort terms by decreasing frequency
         m <- as.matrix(myDtm)
         v <- sort(colSums(m), decreasing=TRUE)
@@ -33,5 +33,7 @@ barPlotFreq <- function(myDtm, topN = 10) {
         
         # rename columns and then plot as barchart
         names(df) <- c("terms", "frequency")
-        ggplot(df[1:topN, ], aes(x=reorder(terms, frequency),y = frequency)) + xlab("terms") + geom_bar(stat = "identity") + coord_flip()
+        ggplot(df[1:topN, ], aes(x=reorder(terms, frequency),y = frequency)) +
+                xlab("terms") + geom_bar(stat = "identity") + coord_flip() +
+                ggtitle(paste("Frequency for Top", topN, "Terms For Sample Size =", sample.size))
 }
