@@ -8,16 +8,25 @@
 #                                                                              #
 # To open the corpus:                                                          #
 # > myCorpus <- openCorpus(sampledir)                                          #
+# To see current sample size                                                   #
+# > meta(myCorpus)                                                             #
 #                                                                              #
 # To remove profanity, puncuation, whitespace, etc.                            #
 # > myCorpus <- cleanCorpus(myCorpus, metadatadir)                             #
 #                                                                              #
+# To split each entry into a separate document                                 #
+# > myCorpus <- splitOutDocsinCorpus(myCorpus)                                 #
+#                                                                              #
 # To create a term document matrix of Bigrams                                  #
 # > myDtm <- tokenizeCorpus(myCorpus, ngram=2)                                 #
+#                                                                              #
+# To start fresh with a new Corpus                                             #
+# > myCorpus <- newCorpus()                                                    #
 ################################################################################
 
 library(tm)
 library("RWeka")
+library("SnowballC")
 
 # path variable names
 datadir <- file.path(getwd(), "data")
@@ -30,11 +39,23 @@ metadatadir <- file.path(datadir, "metadata")
 #used by cleanCorpus()
 chr <- function(n) { rawToChar(as.raw(n)) }
 
+# Append chunk of sample to sample file
+appendChunk <- function(samplefilename, chunck) {
+        if (file.exists(samplefilename)) {
+                openmode = "a"
+        }
+        else openmode = "w"
+        
+        conn <- file(samplefilename, open = openmode, encoding = "UTF-8" )
+        write(chunck, conn)
+        close(conn)
+}
+
 # creates a sample dataset from a file
 # as inputs: the full path to the file, total number of rows in the file, 
 # and the sample size
 # expressed as a decimal between 0.0 and 1.0
-sampleText <- function (filename, totalrows, sampleSize) {  
+sampleText <- function (sourcefilename, samplefilename, totalrows, sampleSize) {  
         # for reproducibility
         set.seed(12345)
         
@@ -43,9 +64,10 @@ sampleText <- function (filename, totalrows, sampleSize) {
 
         sample <- list() # initialize the sample
         
-        conn <- file(filename, open = "rb") # open connection to the file using rb to deal with Cntl-Z in news file
+        conn <- file(sourcefilename, open = "rb") # open connection to the file using rb to deal with Cntl-Z in news file
 
         row <- 0 # initialize row counter
+        chunkcount <- 0 # initialize chunk counter
         
         #read file 1 line at a time 
         while (length(oneLine <- readLines(conn, n = 1, warn = TRUE, skipNul = TRUE)) > 0) {
@@ -54,11 +76,26 @@ sampleText <- function (filename, totalrows, sampleSize) {
                         
                 if(row %in% lineNumber) {
                         # Add 1 line to the sample row set, stripping out the non-ASCII characters
-                        sample <- list(sample, iconv(oneLine, from = "latin1", to="ASCII", sub=""))   
+                        sample <- list(sample, iconv(oneLine, from = "latin1", to="ASCII", sub="")) 
+                        print(paste(sourcefilename, row))
+                        # increment chunk count
+                        chunkcount <- chunkcount + 1
+                        if(chunkcount == 10000) {
+                                print("Appending sample to file...")
+                                appendChunk(samplefilename, unlist(sample))
+                                chunkcount <- 0
+                                sample <- list()
+                        }
+                        
                 }
         }
+        # write out rest of sample
+        print("Appending last sample to file...")
+        appendChunk(samplefilename, unlist(sample))
+        chunkcount <- 0
+        sample <- list()
+        
         close(conn)
-        return(unlist(sample))
 }
 
 # Read and sample text files
@@ -67,7 +104,7 @@ sampleText <- function (filename, totalrows, sampleSize) {
 # output: a Corpus object
 # NOTE: will archive existing sample file first
 createSampleData <- function(datadir) {
-        sample.size <- 0.1
+        sample.size <- 0.05
         samplefilename <- paste0("sampledata_samplesize_", as.character(sample.size), ".txt")
         
         file.news <- "en_US.news.txt"
@@ -79,27 +116,20 @@ createSampleData <- function(datadir) {
         file.twitter <- "en_US.twitter.txt"
         file.twitter.rows <- 2360148
         
-        # Create sample for each source file
-        file.blogs.sample <- sampleText(file.path(datadir, file.blogs), file.blogs.rows, sample.size)
-        file.news.sample <- sampleText(file.path(datadir, file.news), file.news.rows, sample.size)
-        file.twitter.sample <- sampleText(file.path(datadir, file.twitter), file.twitter.rows, sample.size)
-        
-        # Concatenate samples
-        samples <- c(file.blogs.sample, file.news.sample, file.twitter.sample)
-        
-        
-        # Remove existing sample file if it exists
-        #if(file.exists(file.path(sampledir, samplefilename))) {
-        #        file.remove(file.path(sampledir, samplefilename))
-        #}
-        
         # Archive old sample file(s) if present
         archive.sample(sampledir)
         
-        # Create new sample file
-        conn <- file(file.path(sampledir, samplefilename), open = "w", encoding = "UTF-8" )
-        write(samples, conn)
-        close(conn)
+        # Create sample for each source file
+        print("Creating blog sample...")
+        sampleText(file.path(datadir, file.blogs), file.path(sampledir, samplefilename), file.blogs.rows, sample.size)
+
+        print("Creating news sample...")
+        sampleText(file.path(datadir, file.news), file.path(sampledir, samplefilename), file.news.rows, sample.size)
+        
+        print("Creating twitter sample...")
+        sampleText(file.path(datadir, file.twitter), file.path(sampledir, samplefilename), file.twitter.rows, sample.size)
+        
+        print("Done.")
 }
 
 # open sample data as a corpus
@@ -109,10 +139,12 @@ openCorpus <- function(sampleDir) {
         # openning as a VCorpus vs. a simple one - there is an issue with the 
         # ngramtokenizer not workings as desired.  See function tokenizeCorpus
         # for more info
+        print("Opening Sample Directory as VCorpus...")
         myCorpus <- VCorpus(DirSource(sampleDir, encoding = "UTF-8"),
                            readerControl = list(language = "lat"))
 
         # add meta data tag
+        print("Adding meta data tag...")
         sample.size <- getSampleSize(sampleDir)
         
         meta(myCorpus, "SampleSize") <- sample.size
@@ -133,7 +165,13 @@ removePattern <- content_transformer(function(x, pattern) gsub(pattern, "", x, f
 
 # Removes Profanity, Whitespace, and Punctuation
 cleanCorpus <- function(myCorpus, metadataDir) {
-        # Step 1: Remove Profane words from a list originally published by Google
+        print("Cleaning corpus content...")
+        
+        # Step 1: Convert to lower case
+        print("Converting to lower case...")
+        myCorpus <- tm_map(myCorpus, content_transformer(tolower))
+        
+        # Step 2: Remove Profane words from a list originally published by Google
         BannedWordFileName <- "full-list-of-bad-words-banned-by-google-txt-file_2013_11_26_04_53_31_867.txt"
         pathToBannedWordList <- file.path(metadataDir, BannedWordFileName)
         BandWords <- read.csv(pathToBannedWordList, sep="\t", strip.white = TRUE)
@@ -145,23 +183,45 @@ cleanCorpus <- function(myCorpus, metadataDir) {
         
         # This step is no longer needed since we remove all non-ASCII characters
         # when creating this file
-        # Step 2: Remove special characters of the form <U+9999>"
+        # Step 3: Remove special characters of the form <U+9999>"
         # gsub("<U\\+\\d+>", "", x, fixed=FALSE)
         #myCorpus <- tm_map(myCorpus, removePattern, "<") 
         
         # Step 3: Remove punctuation and numbers
-        print("Remvoing punctuation...")
+        print("Removing punctuation...")
         myCorpus <- tm_map(myCorpus, removePunctuation)
-        print("Remvoing numbers")
+        print("Removing numbers...")
         myCorpus <- tm_map(myCorpus, removeNumbers)
         
         # Step 4: Remove english stop words (Not sure we want to do this for the final project)
-        print("Remvoing stop words")
+        print("Removing stop words...")
         myCorpus <- tm_map(myCorpus, removeWords, stopwords(kind = "en"))
+        
+        # Step 5: Convert to Plain Text Document and apply Stemmming
+        #print("Converting to plain text document...")
+        #myCorpus <- tm_map(myCorpus, PlainTextDocument)  # needs to come before stemming
+        print("Stemming...")
+        myCorpus <- tm_map(myCorpus, stemDocument, "english")
+        
+        return(myCorpus)
 }
 
+# converts each line of the corpus into a separate document
+splitOutDocsinCorpus <- function(myCorpus) {
+        print("Splitting content into individual documents...")
+        sample.size <- meta(myCorpus)$SampleSize
+        myCorpus <- VCorpus(VectorSource(myCorpus[[1]]$content))
+        meta(myCorpus)$SampleSize <- sample.size
+}
 
-
+# This function returns a cleaned Corpus of individual documents from the sample in the sampledir
+newCorpus <- function() {
+        myCorpus <- openCorpus(sampledir)
+        myCorpus <- cleanCorpus(myCorpus, metadatadir)
+        myCorpus <- splitOutDocsinCorpus(myCorpus)
+        return(myCorpus)
+}
+                                 #
 
 # This fuction returns a term document matrix for unigrams, bigrams, trigrams or some combination of these
 # inputs are a corpus, the desired ngram OR the min and max of the ngrams to return
@@ -184,6 +244,7 @@ tokenizeCorpus <- function(myCorpus, ngram= 1, minWords=0, maxWords=0) {
                 dtm <- DocumentTermMatrix(myCorpus, control = list(tokenize = MultigramTokenizer)) 
                 }
         else if (ngram == 1) {
+                #print(class(myCorpus))
                 dtm <- DocumentTermMatrix(myCorpus, control = list(tokenize = UnigramTokenizer))    
         }
         else if (ngram == 2){
@@ -193,10 +254,6 @@ tokenizeCorpus <- function(myCorpus, ngram= 1, minWords=0, maxWords=0) {
                 dtm <- DocumentTermMatrix(myCorpus, control = list(tokenize = TrigramTokenizer))
         }
         
-        
-        
-        
-        #plot(tdm, terms = findFreqTerms(tdm, lowfreq = 2)[1:50], corThreshold = 0.5)  
         
         return(dtm)
         
@@ -223,6 +280,9 @@ getSampleSize <- function(sampleDir) {
         }
         if (file.exists(file.path(sampleDir, "sampledata_samplesize_0.1.txt"))) {
                 sample.size <- "10%"
+        }
+        if (file.exists(file.path(sampleDir, "sampledata_samplesize_0.05.txt"))) {
+                sample.size <- "5%"
         }
         else sample.size < "Unknown"
         
