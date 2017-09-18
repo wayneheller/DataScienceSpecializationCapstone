@@ -3,11 +3,12 @@
 # October - December 2017                                                      #
 # Wayne Heller                                                                 #
 #                                                                              #
-# To create a bar plot of top 10 words
-# > barPlotFreq(myDtm, topN = 10, meta(myCorpus)$SampleSize)
-#
-# To create a graph network diagram of top 5 words
-# > 
+# To create a bar plot of top 10 words                                         #
+# > barPlotFreq(myDtm, topN = 10, sample.size = meta(myCorpus)$SampleSize)     #
+#                                                                              #
+# To create a graph network diagram of top 5 words assciated to "one"          #
+# > terms <- findAssociatedTerms(myDtm, "one")                                 #
+# > graphDtm(myDtm, c("one", terms), corThresh = 0.07)                         #                                                 #
 ################################################################################
 
 # Data Exploration and Visualization
@@ -18,8 +19,10 @@ library(Rgraphviz)
 library(ggplot2)
 
 # returns a sorted descending vector of topN most frequent terms based on low frequency threshold
-findTopNFreqTerms <- function(myDtm, lowFreq=2, topN=5){
-        # must set lowFreq sufficiently large in order to avoid memory errors
+# INPUT: a document term matrix, low frequency threshold, number of terms to return
+# NOTE: Set lowFreq sufficiently large in order to avoid memory errors
+findTopNFreqTerms <- function(myDtm, lowFreq=2000, topN=5){
+        
         
         print("Finding frequent terms based on lowFreq...")
         myDtm <- myDtm[, findFreqTerms(myDtm, lowfreq = lowFreq)]
@@ -33,50 +36,40 @@ findTopNFreqTerms <- function(myDtm, lowFreq=2, topN=5){
         return(v)
 }
 
-# returns a sorted descending vector of topN most correlated terms to the input term
-findAssociatedTerms <- function(myDtm, term, topN = 5, corLimit = 0.25){
+# Returns a sorted descending vector of topN most correlated terms to the input term
+# INPUTS are a document term matrix, the root term, the number of associates to return
+# and the correlation threshold
+# OUTPUT is a sorted vector of top terms
+findAssociatedTerms <- function(myDtm, term, topN = 5, corLimit = 0.025){
         print(paste("Finding terms associated with", term, "..."))
-        v <- findAssocs(myDtm, term, corlimit=0.025)
+        v <- findAssocs(myDtm, term, corlimit=corLimit)
         u <- unlist(v)
         names(u) <- sapply(names(u), function(x) substring(x, nchar(term) + 2))
         print(u[1:topN])
         return(names(u)[1:topN])
 }
 
-# creates a graph of terms from a dtm
-
-graphDtm <- function(myDtm, myTerms) {
+# Creates a graph of terms from a dtm
+# INPUTS: a document term matrix (or term document matrix), and the subset of terms to graph
+# OUTPUT is a network diagram of related terms
+# NOTE:  Need to fine tune corThresh to get interesting results, if corThresh is too low
+# then all notes are connected
+graphDtm <- function(myDtm, myTerms, corThresh = 0) {
         
-        print("Plotting...")
-        plot(myDtm, terms = myTerms)
+        print("Plotting network graph of terms...")
+        plot(myDtm, terms = myTerms, corThreshold = corThresh)
         
 }
 
-graphTdm <- function(myTdm, lowFreq = 2, topN = 5, corthreshold = 0.0) {
-        # must set lowFreq sufficiently large in order to avoid memory errors
+# Creates a horizontal bar chart of top terms
+# INPUT: is a document term matrix, the low frequency threshold, the number of terms to plot
+# and a string for the sample size from which the dtm was created
+# OUTPUT: is a bar chart
+# NOTE:# set lowFreq sufficiently large in order to avoid memory errors
+barPlotFreq <- function(myDtm, lowFreq = 2000, topN = 10, sample.size) {
         
-        print("Finding frequent terms based on lowFreq...")
-        myTdm <- myTdm[findFreqTerms(myTdm, lowfreq = lowFreq) , ]
-        
-        print("Convering Dtm to matrix...")
-        m <- as.matrix(myTdm)
-        print("Sorting rows")
-        v <- sort(rowSums(m), decreasing=TRUE)
-        print("Plotting...")
-        plot(myTdm, term = names(v)[1:topN], corThreshold = corthreshold)
-        
-        print(v[1:topN])
-}
-
-barPlotFreq <- function(myDtm, lowFreq = 2, topN = 10, sample.size) {
-        # must set lowFreq sufficiently large in order to avoid memory errors
-        
-        print("Finding frequent terms based on lowFreq...")
-        myDtm <- myDtm[, findFreqTerms(myDtm, lowfreq = lowFreq)]
-        
-        # sort terms by decreasing frequency
-        m <- as.matrix(myDtm)
-        v <- sort(colSums(m), decreasing=TRUE)
+        # get vector of top frequency terms
+        v <- findTopNFreqTerms(myDtm, lowFreq, topN)
         
         # convert to a dataframe for plotting
         df <- data.frame(v)
