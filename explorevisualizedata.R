@@ -11,12 +11,15 @@
 # > graphDtm(myDtm, c("one", terms), corThresh = 0.07)                         #                                                 #
 ################################################################################
 
+## ---- exploringvisualizing
+
 # Data Exploration and Visualization
 # instructions to install Rgraphviz package
 # http://www.bioconductor.org/install/
 # source("https://bioconductor.org/biocLite.R"); bioLite("Rgraphviz")
 library(Rgraphviz)
 library(ggplot2)
+library(Matrix)
 
 # returns a sorted descending vector of topN most frequent terms based on low frequency threshold
 # INPUT: a document term matrix, low frequency threshold, number of terms to return
@@ -66,6 +69,7 @@ graphDtm <- function(myDtm, myTerms, corThresh = 0) {
 # and a string for the sample size from which the dtm was created
 # OUTPUT: is a bar chart
 # NOTE:# set lowFreq sufficiently large in order to avoid memory errors
+# NOTE: For 2-gram on 5% sample, this works well barPlotFreq(myDtm, sample.size = meta(myCorpus)$SampleSize, lowFreq = 100)
 barPlotFreq <- function(myDtm, lowFreq = 2000, topN = 10, sample.size) {
         
         # get vector of top frequency terms
@@ -84,3 +88,54 @@ barPlotFreq <- function(myDtm, lowFreq = 2000, topN = 10, sample.size) {
                 xlab("terms") + geom_bar(stat = "identity") + coord_flip() +
                 ggtitle(paste("Frequency for Top", topN, "Terms For Sample Size =", sample.size))
 }
+# Example Usage: barPlotFreqDfm(myDfm, sample.size = metadoc(myCorpus, "SampleSize"), topN=15 )
+barPlotFreqDfm <- function(myDfm, topN = 10, sample.size) {
+        
+        # get vector of top frequency terms
+        v <- topfeatures(myDfm, topN)
+        
+        # convert to a dataframe for plotting
+        df <- data.frame(v)
+        # convert rownames to first column
+        names <- rownames(df)
+        rownames(df) <- NULL
+        df <- cbind(names,df)
+        
+        # rename columns and then plot as barchart
+        names(df) <- c("terms", "frequency")
+        ggplot(df[1:topN, ], aes(x=reorder(terms, frequency),y = frequency)) +
+                xlab("terms") + geom_bar(stat = "identity") + coord_flip() +
+                ggtitle(paste("Frequency for Top", topN, "Terms For Sample Size =", sample.size))
+}
+
+# Creates distribution of frequencies
+histDistFreq <- function(myDtm, sample.size){
+        #v <- findFreqTerms(myDtm)
+        #v <- findTopNFreqTerms(myDtm, 2000, 200)
+        #myDtm <- myDtm[, findFreqTerms(myDtm, lowfreq = 1)]
+        # convert dtm to matrix
+        m <- Matrix(myDtm)
+        print(m)
+        # create a df with terms and frequencies
+        v <- rowSums(m)
+        print(v)
+        # convert to a datafMame for plotting
+        print("converting to dataframe...")
+        df <- data.frame(v)
+        # convert rownames to first column
+        #names <- rownames(df)
+        #rownames(df) <- NULL
+        #df <- cbind(names,df)
+        
+        # rename columns and then plot as barchart
+        names(df) <- "frequency"
+        print(head(df))
+        print("plotting...")
+        # plot using ggplot
+        g <- ggplot(df, aes(x=frequency)) +
+                stat_bin(bins = 20)
+        print(g)
+        
+}
+
+## ---- end-exploringvisualizing

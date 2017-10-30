@@ -24,6 +24,8 @@
 # > myCorpus <- newCorpus()                                                    #
 ################################################################################
 
+## ---- preprocessing
+
 library(tm)
 library("RWeka")
 library("SnowballC")
@@ -140,12 +142,13 @@ openCorpus <- function(sampleDir) {
         # ngramtokenizer not workings as desired.  See function tokenizeCorpus
         # for more info
         print("Opening Sample Directory as VCorpus...")
-        myCorpus <- VCorpus(DirSource(sampleDir, encoding = "UTF-8"),
+        myCorpus <- VCorpus(DirSource(sampleDir, encoding = "UTF-8", mode="binary"),
                            readerControl = list(language = "lat"))
 
         # add meta data tag
         print("Adding meta data tag...")
         sample.size <- getSampleSize(sampleDir)
+        print(paste("Sample Size =", sample.size))
         
         meta(myCorpus, "SampleSize") <- sample.size
         
@@ -210,18 +213,23 @@ cleanCorpus <- function(myCorpus, metadataDir) {
 splitOutDocsinCorpus <- function(myCorpus) {
         print("Splitting content into individual documents...")
         sample.size <- meta(myCorpus)$SampleSize
+        print(sample.size)
         myCorpus <- VCorpus(VectorSource(myCorpus[[1]]$content))
-        meta(myCorpus)$SampleSize <- sample.size
+        meta(myCorpus, "SampleSize") <- sample.size
+        #print(meta(myCorpus)$SampleSize)
+        return(myCorpus)
 }
 
 # This function returns a cleaned Corpus of individual documents from the sample in the sampledir
 newCorpus <- function() {
         myCorpus <- openCorpus(sampledir)
         myCorpus <- cleanCorpus(myCorpus, metadatadir)
-        myCorpus <- splitOutDocsinCorpus(myCorpus)
+        # splitting out individual entries into documents makes working with the DTM computationally
+        # complex and in some cases isn't necessary
+        #myCorpus <- splitOutDocsinCorpus(myCorpus)
         return(myCorpus)
 }
-                                 #
+                                 
 
 # This fuction returns a term document matrix for unigrams, bigrams, trigrams or some combination of these
 # inputs are a corpus, the desired ngram OR the min and max of the ngrams to return
@@ -284,7 +292,10 @@ getSampleSize <- function(sampleDir) {
         if (file.exists(file.path(sampleDir, "sampledata_samplesize_0.05.txt"))) {
                 sample.size <- "5%"
         }
-        else sample.size < "Unknown"
+        else sample.size <- "Unknown"
         
         return(sample.size)
 }
+
+## ---- end-preprocessing
+

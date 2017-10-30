@@ -1,0 +1,97 @@
+---
+title: "Exploratory Data Analysis - Word Prediction Application"
+author: "Wayne Heller"
+date: "October 25, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```
+
+## Context
+
+The data explored on this page will be used to build a predictive word search and incorporate it into a Shiny Application.  Documented below are features of the data and an outline of the approach for the application.
+
+
+
+## The Corpus
+The Corpus of 3 files is provided by Coursera in the context of the John's Hopkins Data Science Specializaiton Capstone project.  Each is a sample from 3 different sources:  Twitter, Blogs and News Articles.  In the table below are some basic descriptors of each file.  Note, no preprocessing has been performed.
+
+```{r basic-stats, cache=TRUE, eval=FALSE, warning=TRUE}
+datadir <- file.path(getwd(), "data")
+file.news <- "en_US.news.txt"
+file.blogs <- "en_US.blogs.txt"
+file.twitter <- "en_US.twitter.txt"
+library(ngram)
+library(knitr)
+
+# Read in each file individually: NEWS
+sourcefilename <- file.path(datadir, file.news)
+conn <- file(sourcefilename, open = "rb")
+x <- readLines(conn, warn = TRUE, skipNul = TRUE)
+close(conn)
+# Call length(file.content) for unique lines
+file.news.lines <- length(x)
+# Call ngram library to get word count
+file.news.words <- wordcount(x)
+
+# Read in each file individually: BLOGS
+sourcefilename <- file.path(datadir, file.blogs)
+conn <- file(sourcefilename, open = "rb")
+x <- readLines(conn, warn = TRUE, skipNul = TRUE)
+close(conn)
+# Call length(file.content) for unique lines
+file.blogs.lines <- length(x)
+# Call ngram library to get word count
+file.blogs.words <- wordcount(x)
+
+# Read in each file individually: TWITTER
+sourcefilename <- file.path(datadir, file.twitter)
+conn <- file(sourcefilename, open = "rb")
+x <- readLines(conn, warn = TRUE, skipNul = TRUE)
+close(conn)
+# Call length(file.content) for unique lines
+file.twitter.lines <- length(x)
+# Call ngram library to get word count
+file.twitter.words <- wordcount(x)
+
+fileNames <- c(file.news, file.blogs, file.twitter)
+numLines <- c(file.news.lines, file.blogs.lines, file.twitter.lines)
+numWords <- c(file.news.words, file.blogs.words, file.twitter.words)
+
+df <- data.frame(fileNames, numLines, numWords)
+kable(df, format.args = list(big.mark = ","), col.names = c("File", "Lines", "Words"))
+        
+```
+
+## Sampling
+Extracting a sample is necessary given the size of the corpus, the computing power available on my development pc, and the desire to create a prediction application that will ultimately run on a mobile device.  After some experimentation, I have extracted a randomly selected 5% sample of lines from each source and combined them into a single file.  That sample is used to create the summaries below. There are 171,476 words in the Oxford English Dictionary in current use.  The 5% sample contains about 104,000 terms; however, not all of them are proper words. As part of the next steps for this project, I will help validate whether the sample size is sufficient to create a viable application.
+
+``` {r echo=FALSE}
+library(knitr)
+
+read_chunk('gathercleandata.R')
+read_chunk('explorevisualizedata.R')
+
+```
+
+### Word Frequencies
+
+``` {r cache=TRUE, echo=FALSE}
+
+<<preprocessing>>
+        
+myCorpus <- newCorpus()
+myDtm <- tokenizeCorpus(myCorpus)
+
+```
+
+``` {r cache=TRUE, echo=TRUE}
+
+<<exploringvisualizing>>
+barPlotFreq(myDtm, topN = 10, sample.size = meta(myCorpus)$SampleSize)
+        
+```
+
+
