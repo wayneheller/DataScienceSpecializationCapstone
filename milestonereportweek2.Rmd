@@ -1,5 +1,5 @@
 ---
-title: "Exploratory Data Analysis - Word Prediction Application"
+title: "Milestone Report - Word Prediction Application"
 author: "Wayne Heller"
 date: "October 25, 2017"
 output: html_document
@@ -66,32 +66,49 @@ kable(df, format.args = list(big.mark = ","), col.names = c("File", "Lines", "Wo
 ```
 
 ## Sampling
-Extracting a sample is necessary given the size of the corpus, the computing power available on my development pc, and the desire to create a prediction application that will ultimately run on a mobile device.  After some experimentation, I have extracted a randomly selected 5% sample of lines from each source and combined them into a single file.  That sample is used to create the summaries below. There are 171,476 words in the Oxford English Dictionary in current use.  The 5% sample contains about 104,000 terms; however, not all of them are proper words. As part of the next steps for this project, I will help validate whether the sample size is sufficient to create a viable application.
+Extracting a sample is necessary given the size of the corpus, the computing power available on my development pc, and the desire to create a prediction application that will ultimately run on a mobile device.  After some experimentation, I have extracted a randomly selected 5% sample of lines from each source and combined them into a single file.  That sample is used to create the summaries below. There are 171,476 words in the Oxford English Dictionary in current use.  The 5% sample contains about 145,000 terms; however, not all of them are proper words. As part of the next steps for this project, I will help validate whether the sample size is sufficient to create a viable application.
 
 ``` {r echo=FALSE}
 library(knitr)
 
 read_chunk('gathercleandata.R')
+read_chunk('loadandcleandata.R')
 read_chunk('explorevisualizedata.R')
 
 ```
 
-### Word Frequencies
+## Word Frequencies
+The following 1-3-gram frequencies were obtained from the sample after preprocessing (convert to lowercase, remove punctuation, numbers, stop words, banned words)
 
-``` {r cache=TRUE, echo=FALSE}
+``` {r loadingCorpus, cache=TRUE, echo=FALSE}
 
 <<preprocessing>>
         
-myCorpus <- newCorpus()
-myDtm <- tokenizeCorpus(myCorpus)
+<<preprocessingqanteda>>
+        
+myCorpus <- loadCorpus()
 
 ```
 
-``` {r cache=TRUE, echo=TRUE}
+
+``` {r histograms, cache=TRUE, echo=FALSE}
 
 <<exploringvisualizing>>
-barPlotFreq(myDtm, topN = 10, sample.size = meta(myCorpus)$SampleSize)
+myDfm <- getDfm(myCorpus, ngram = 1)
+barPlotFreqDfm(myDfm, sample.size = metadoc(myCorpus, "SampleSize"), topN=10 )
+
+myDfm <- getDfm(myCorpus, ngram = 2)
+barPlotFreqDfm(myDfm, sample.size = metadoc(myCorpus, "SampleSize"), topN=10 )
+
+myDfm <- getDfm(myCorpus, ngram = 3)
+barPlotFreqDfm(myDfm, sample.size = metadoc(myCorpus, "SampleSize"), topN=10 )
         
 ```
 
+## Next Steps To Build Word Predication Application
+1. Build next word prediction mode based on n-grams
+2. Refine model to handle unseen patterns
+3. Evaluate model accuracy and refine (e.g. change sample size)
+4. Create Shiny application user interface and connect to word prediction model
+5. Tune for performance issues along the way.
 

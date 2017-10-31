@@ -1,6 +1,8 @@
 ### 10/30/17 switching to Quanteda package
 ### Also installed readtext companion package
 
+## ---- preprocessingqanteda
+
 library(quanteda)
 library(readtext)
 
@@ -40,3 +42,5 @@ getDfm <- function(myCorpus, ngram=1) {
         
         return(myDfm)
 }
+
+## ----end-preprocessingqanteda
