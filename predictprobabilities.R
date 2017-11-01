@@ -1,9 +1,9 @@
-library(ngram)
+#library(ngram) # 11/1/17 Revised to use Dfm and not Corpus text
 library(dplyr)
 
 # Create a character vector for the corpus content
-str <- c(lapply(myCorpus, "[", 1))
-str <- paste( unlist(str), collapse=' ')
+#str <- c(lapply(myCorpus, "[", 1))
+#str <- paste( unlist(str), collapse=' ')
 
 # returns a dataframe of ngram conditional probabilities
 # input is the corpus text in its entiretly and the length of the ngram
@@ -12,14 +12,21 @@ str <- paste( unlist(str), collapse=' ')
 # names in dplyr
 # NOTE: A how to work with dplyr and variable names is here:
 # https://datascience.blog.wzb.eu/2016/09/27/dynamic-columnvariable-names-with-dplyr-using-standard-evaluation-functions/
-calcNgramProb <- function(myCorpus.text, ngramLength=2) {
+calcNgramProb <- function(myDfm, ngramLength = 2) {
         # create ngram table
-        ng <- ngram(str, n=ngramLength)   
+        #ng <- ngram(str, n=ngramLength)   
         # create frequency table 
-        df <- get.phrasetable(ng)
+        #df <- get.phrasetable(ng)
+        
+        # Transpose Dfm into a dataframe of features and frequencies
+        df <- as.data.frame(t(myDfm))  
+        
+        names(df) <-  "freq"
+        
         # separate each term in the ngram into a separate column
         for (i in 1:ngramLength) {
-                df[[LETTERS[i]]] <- vapply(strsplit(df[,1]," "), `[`, i, FUN.VALUE=character(1))
+                #df[[LETTERS[i]]] <- vapply(strsplit(df[,1]," "), `[`, i, FUN.VALUE=character(1))
+                df[[LETTERS[i]]] <- vapply(strsplit(rownames(df)," "), `[`, i, FUN.VALUE=character(1))
         }
         
         # create strings for the various dplyr actions
