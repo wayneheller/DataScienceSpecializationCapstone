@@ -17,6 +17,8 @@
 # instructions to install Rgraphviz package
 # http://www.bioconductor.org/install/
 # source("https://bioconductor.org/biocLite.R"); bioLite("Rgraphviz")
+library(dplyr)
+library(tidyverse)
 library(Rgraphviz)
 library(ggplot2)
 library(Matrix)
@@ -107,6 +109,48 @@ barPlotFreqDfm <- function(myDfm, topN = 10, sample.size) {
                 xlab("terms") + geom_bar(stat = "identity") + coord_flip() +
                 ggtitle(paste("Frequency for Top", topN, "Terms For Sample Size =", sample.size))
 }
+
+# Creates a line graph of the cummulative frequencies of words to help define a cutoff point
+lineplotFreqDensity <- function(myDfm){
+        df <- as.data.frame(t(myDfm))
+        df <- rownames_to_column(df)
+        names(df) <- c("term", "freq")
+        #print(head(df,5))
+        df <- df %>% group_by(freq)
+        print(head(df))
+        df_sum <- df %>% summarise(group_total = sum(freq)) %>% arrange(desc(freq))
+        df_sum[, 3] <- cumsum(df_sum[, 2])
+        names(df_sum) <- c("freq", "group_total", "cumsum_group_total")
+        
+        print(head(df_sum))
+        cummulative_sum <- df_sum[nrow(df_sum), 3][[1]]
+        print(cummulative_sum)
+        
+        df_sum <- mutate(df_sum, density_group_total = cumsum_group_total / cummulative_sum)
+        #dens <- density(df_sum$cumsum_group_total)
+        #print(dens$x)
+        #df_sum <- mutate(df_sum, density2 = stats::density(cumsum_group_total))
+        probs <- c(0.20, .40, .60, .80)
+        quantiles <- quantile(df_sum$density_group_total, prob=probs)
+        print(quantiles)
+        df_sum$quant <- factor(findInterval(df_sum$density_group_total,quantiles))
+        View(df_sum)
+        print(df_sum[min(which(df_sum$density_group_total >=.8)), ])
+        #names(df_sum) <- c("freq", "group_total", "cumsum_group_total", "density_group_total")
+        #g <- ggplot(df_sum[, c("freq", "group_total")], aes(x = -freq, y=group_total)) + stat_ecdf(geom = "step")
+        g <- ggplot(df_sum[, c("freq", "density_group_total", "quant")], aes(x = -freq, y=density_group_total, fill=quant)) + geom_area() #+ scale_fill_manual(values = c('green', 'red','blue','orange', 'brown', 'yellow'))
+        #g <- ggplot(df_sum, aes(-freq,density_group_total, fill=quant)) + geom_line() + geom_ribbon(aes(ymin=0, ymax=density_group_total, fill=quant)) + scale_x_continuous(breaks=quantiles) #+ scale_fill_brewer(guide="none")
+        print(g)
+        
+}
+
+# dt <- data.table(x=c(1:200),y=rnorm(200))
+# dens <- density(dt$y)
+# df <- data.frame(x=dens$x, y=dens$y)
+# probs <- c(0.1, 0.25, 0.5, 0.75, 0.9)
+# quantiles <- quantile(dt$y, prob=probs)
+# df$quant <- factor(findInterval(df$x,quantiles))
+# ggplot(df, aes(x,y)) + geom_line() + geom_ribbon(aes(ymin=0, ymax=y, fill=quant)) + scale_x_continuous(breaks=quantiles) + scale_fill_brewer(guide="none")
 
 # Creates distribution of frequencies
 histDistFreq <- function(myDtm, sample.size){
