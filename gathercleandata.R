@@ -33,9 +33,11 @@ library("SnowballC")
 # path variable names
 datadir <- file.path(getwd(), "data")
 
-sampledir <- file.path(datadir, "sampleddata")
+sampledir <- file.path(datadir, "trainingdata")
 sampledirarchive <- file.path(datadir, "sampleddatearchive")
 metadatadir <- file.path(datadir, "metadata")
+devdatadir <- file.path(datadir, "devdata")
+testingdatadir <- file.path(datadir, "testingdata")
 
 # helper function to convert an ascii code to its character
 #used by cleanCorpus()
@@ -53,16 +55,37 @@ appendChunk <- function(samplefilename, chunck) {
         close(conn)
 }
 
-# creates a sample dataset from a file
+# creates a training, testing and dev datasets from a source file in the corpus
 # as inputs: the full path to the file, total number of rows in the file, 
-# and the sample size
-# expressed as a decimal between 0.0 and 1.0
-sampleText <- function (sourcefilename, samplefilename, totalrows, sampleSize) {  
+# and the sample size expressed as a decimal between 0.0 and 1.0
+# sammplefiletype = training|testing|development
+sampleText <- function (sourcefilename, samplefiletype, totalrows, sample.size) {  
+        
+        samplefilename <- switch(samplefiletype,
+               training = paste0("sampledata_samplesize_", as.character(sample.size), ".txt"),
+               testing =  paste0("testdata_samplesize_", as.character(sample.size), ".txt"),
+               development =  paste0("devdata_samplesize_", as.character(sample.size), ".txt")
+        )
+        
+        samplefilename <- switch(samplefiletype,
+                training = file.path(sampledir, samplefilename),
+                testing =  file.path(testingdatadir, samplefilename),
+                development =  file.path(devdatadir, samplefilename)
+        )
+        
+        seed.value <- switch(samplefiletype,
+                                 training = 12345,
+                                 testing =  23456,
+                                 development =  34567
+        )
+        
+        
+        
         # for reproducibility
-        set.seed(12345)
+        set.seed(seed.value)
         
         # generate line numbers of the file to include in the sample
-        lineNumber = sample(totalrows, sampleSize * totalrows)
+        lineNumber <-  sample(totalrows, sample.size * totalrows)
 
         sample <- list() # initialize the sample
         
@@ -105,9 +128,9 @@ sampleText <- function (sourcefilename, samplefilename, totalrows, sampleSize) {
 # input is the full path to the directory containing the original corpus
 # output: a Corpus object
 # NOTE: will archive existing sample file first
-createSampleData <- function(datadir) {
-        sample.size <- 0.05
-        samplefilename <- paste0("sampledata_samplesize_", as.character(sample.size), ".txt")
+# sample.size 0 < x < 1
+# samplefiletype = 'training' 'testing' 'development'
+createSampleData <- function(datadir, sample.size, samplefiletype) {
         
         file.news <- "en_US.news.txt"
         file.news.rows <- 1010242
@@ -118,18 +141,24 @@ createSampleData <- function(datadir) {
         file.twitter <- "en_US.twitter.txt"
         file.twitter.rows <- 2360148
         
-        # Archive old sample file(s) if present
-        archive.sample(sampledir)
+        # Archive old  file(s) if present
+        dirtoarchive <- switch(samplefiletype,
+                                 training = sampledir,
+                                 testing =  testingdatadir,
+                                 development =  devdatadir
+        )
+        
+        archive.sample(dirtoarchive)
         
         # Create sample for each source file
         print("Creating blog sample...")
-        sampleText(file.path(datadir, file.blogs), file.path(sampledir, samplefilename), file.blogs.rows, sample.size)
+        sampleText(file.path(datadir, file.blogs), samplefiletype, file.blogs.rows, sample.size)
 
         print("Creating news sample...")
-        sampleText(file.path(datadir, file.news), file.path(sampledir, samplefilename), file.news.rows, sample.size)
+        sampleText(file.path(datadir, file.news), samplefiletype, file.news.rows, sample.size)
         
         print("Creating twitter sample...")
-        sampleText(file.path(datadir, file.twitter), file.path(sampledir, samplefilename), file.twitter.rows, sample.size)
+        sampleText(file.path(datadir, file.twitter), samplefiletype, file.twitter.rows, sample.size)
         
         print("Done.")
 }

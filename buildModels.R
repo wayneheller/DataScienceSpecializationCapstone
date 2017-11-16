@@ -3,9 +3,11 @@
 # Construct simple backoff model
 
 # Load Corpus from sample file
-myCorpus <- loadCorpus()
+myCorpus <- loadCorpus(samplefiletype = 'training', sample.size = 0.10)
 # Replace Unigrams with frequency 1 with UNK
-unkWords <- identifyLowFreqTerms(myCorpus, lowfreq = 1)
+#unkWords <- identifyLowFreqTerms(myCorpus, lowfreq = 1)
+
+unkWords <- ""
 
 # Build individual models and then combine
 
@@ -16,7 +18,7 @@ unkWords <- identifyLowFreqTerms(myCorpus, lowfreq = 1)
 myDfm <- getDfm(myCorpus, ngram = 4, unkWords)
 # Threshold parameter set finding natural cutoff point in data, see function 
 # description for more details
-#myDfm <- pruneDfm(myDfm, freqThreshold = .09)  
+myDfm <- pruneDfm(myDfm, frequencyThreshold = 2)  
 
 # get dataframe of ngram probabilities
 dt.4 <- calcNgramProb(myDfm, ngramLength = 4)
@@ -27,7 +29,7 @@ dt.4 <- calcNgramProb(myDfm, ngramLength = 4)
 myDfm <- getDfm(myCorpus, ngram = 3, unkWords)
 # Threshold parameter set finding natural cutoff point in data, see function 
 # description for more details
-#myDfm <- pruneDfm(myDfm, freqThreshold = .30)  
+myDfm <- pruneDfm(myDfm, frequencyThreshold = 2)  
 
 # get dataframe of ngram probabilities
 dt.3 <- calcNgramProb(myDfm, ngramLength = 3)
@@ -37,7 +39,7 @@ dt.3 <- calcNgramProb(myDfm, ngramLength = 3)
 myDfm <- getDfm(myCorpus, ngram = 2, unkWords)
 # Threshold parameter set finding natural cutoff point in data, see function 
 # description for more details
-myDfm <- pruneDfm(myDfm, freqThreshold = .73)  
+myDfm <- pruneDfm(myDfm, frequencyThreshold = 2)  
 
 # get dataframe of ngram probabilities
 dt.2 <- calcNgramProb(myDfm, ngramLength = 2)
@@ -47,7 +49,7 @@ dt.2 <- calcNgramProb(myDfm, ngramLength = 2)
 myDfm <- getDfm(myCorpus, ngram = 1, unkWords)
 # Threshold parameter set finding natural cutoff point in data, see function 
 # description for more details
-myDfm <- pruneDfm(myDfm, freqThreshold = .96)  
+myDfm <- pruneDfm(myDfm, frequencyThreshold = 2)  
 
 # get dataframe of ngram probabilities
 dt.1 <- calcNgramProb(myDfm, ngramLength = 1)

@@ -21,7 +21,6 @@ shinyUI(fluidPage(
         h4("Instructions:"),
         h5("Step 0: Be Patient While Data Loads."),
         p("You should see a progress message in the lower right corner.  If not, you may need to reload this page."),
-        h5("Begin typing text in the box below"),
   
         uiOutput("phrase")
 

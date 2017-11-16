@@ -9,14 +9,29 @@ library(dplyr)
 library(tidyverse)
 
 
-samplefilename <- "sampledata_samplesize_0.05.txt"
+
 
 # loads the sample file and creates a corpus from it
-# if unkWords is specified, will replace list of words with "unk"
-loadCorpus <- function() {
-        mySampleFile <- readtext(file.path(sampledir, samplefilename))
+
+loadCorpus <- function(samplefiletype = 'training', sample.size = 0.05) {
+        samplefilename <- switch(samplefiletype,
+                                 training = paste0("sampledata_samplesize_", as.character(sample.size), ".txt"),
+                                 testing =  paste0("testdata_samplesize_", as.character(sample.size), ".txt"),
+                                 development =  paste0("devdata_samplesize_", as.character(sample.size), ".txt")
+        )
+        
+        samplefilename <- switch(samplefiletype,
+                                 training = file.path(sampledir, samplefilename),
+                                 testing =  file.path(testingdatadir, samplefilename),
+                                 development =  file.path(devdatadir, samplefilename)
+        )
+        print(samplefilename)
+        
+        mySampleFile <- readtext(samplefilename)
+        
         myCorpus <- corpus(mySampleFile)
         metadoc(myCorpus, "SampleSize") <- getSampleSize(sampledir)
+        
         return(myCorpus)
         
 }
@@ -52,25 +67,33 @@ getDfm <- function(myCorpus, ngram=1, unkWords="") {
 }
 
 # returns the Dfm filter down to just terms with frequency density greater than threshold
-pruneDfm <- function(myDfm, freqThreshold) {
-        # Transpose and convert to dataframe
-        df <- as.data.frame(t(myDfm))
-        df <- rownames_to_column(df)
-        names(df) <- c("term", "freq")
+pruneDfm <- function(myDfm, densityThreshold = 0, frequencyThreshold = 0)  {
+        if (densityThreshold > 0) {
+                # Transpose and convert to dataframe
+                df <- as.data.frame(t(myDfm))
+                df <- rownames_to_column(df)
+                names(df) <- c("term", "freq")
+                
+                df_sum <- df %>% group_by(freq) %>% summarise(group_total = sum(freq)) %>% arrange(desc(freq)) %>%
+                         mutate(cumsum_group_total = cumsum(group_total))
+                
+                # Find total cummulative sum
+                cummulative_sum <- df_sum[nrow(df_sum), 3][[1]]
         
-        df_sum <- df %>% group_by(freq) %>% summarise(group_total = sum(freq)) %>% arrange(desc(freq)) %>%
-                 mutate(cumsum_group_total = cumsum(group_total))
+                # create density column
+                df_sum <- mutate(df_sum, density_group_total = cumsum_group_total / cummulative_sum)
+          
+                View(df_sum)
         
-        # Find total cummulative sum
-        cummulative_sum <- df_sum[nrow(df_sum), 3][[1]]
+        
+                # find the freq value that is just above the threadhold value
+                minFreq <- df_sum[max(which(df_sum$density_group_total <= densityThreshold)), ]$freq         
+        }
+        
+        else {
+                minFreq <- frequencyThreshold
+        }
 
-        # create density column
-        df_sum <- mutate(df_sum, density_group_total = cumsum_group_total / cummulative_sum)
-  
-        View(df_sum)
-        
-        # find the freq value that is just above the threadhold value
-        minFreq <- df_sum[max(which(df_sum$density_group_total <= freqThreshold)), ]$freq
         print(minFreq)
         # trim the dfm to the minimum frequency count
         return(dfm_trim(myDfm, min_count = minFreq))

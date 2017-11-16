@@ -24,13 +24,16 @@ shinyServer(function(input, output) {
         # Wait for change in airline selection input to set flight numbers
         observeEvent(input$type_phrase, {
                 last.char <- substr(input$type_phrase, nchar(input$type_phrase),nchar(input$type_phrase))
+        
                 if (last.char == ' ') {
-                        i = runif(n=1, min=1, max = 5)
+                        
                         output$data <- renderDataTable({
-                                queryModelNextWord(input$type_phrase, topN = 3)
+                                queryModelNextWord(input$type_phrase, topN = 3, verbose = FALSE)
                                 
-                                 })
+                                 }, options = list(paging = FALSE, searching = FALSE, info = FALSE),
+                                searchDelay = 1000)
                 }
+                
         }, ignoreInit = TRUE)
   
        

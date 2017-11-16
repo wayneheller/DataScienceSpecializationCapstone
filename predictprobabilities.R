@@ -66,29 +66,46 @@ calcNgramProb <- function(myDfm, ngramLength = 2) {
 # Assumes dt_model has been build
 # Queries model for a phrase
 # returns data.table of top n next work predictions
-queryModelNextWord <- function(phrase, topN=3, nextWord = NULL) {
+queryModelNextWord <- function(phrase, topN=3, nextWord = NULL, verbose = TRUE) {
         # get the number of words in the phrase
-        ntoks <- sapply(gregexpr("[A-z]\\W+", phrase), length) + 1L
+        #ntoks <- sapply(gregexpr("[A-z]\\W+", phrase), length) + 1L
         
         # tokeninze the phrase
-        toks <- tokens(phrase)
+        toks <- tokens(char_tolower(phrase), what ='word')
+        #print(toks)
+        # get the number of words in the phrase
+        ntoks <- length(unlist(toks))
+        # print(ntoks)
         # get last token in order to filter down the ngram list
         toks.last <- tail(toks[[1]],1)
+        # print(toks.last)
 
         
         # construct ngrams from the tokens 
         ngrams <- tokens_ngrams(toks, n = 1:ntoks, concatenator = " ")
+        # print(ngrams)
         
         # filter the ngram list to those tokens ending in the last word of the phrase
         toks.pattern <- paste0(toks.last, "$")
+        # print(toks.pattern)
         ngrams <- tokens_select(ngrams, pattern = toks.pattern, valuetype="regex")
+        # print(ngrams)
         
         if (is.null(nextWord)) {
-                # subset the data and return the topN from reach ngram type
-                return(dt_model[prefix %in% ngrams, head(.SD, topN), by=.(ngramlength, prefix)])              
+                # subset the data and return the topN from each ngram type
+                if (verbose == TRUE){
+                        return(dt_model[prefix %in% ngrams, head(.SD, topN), by=.(ngramlength, prefix)])   
+                }
+                else { # just return the next word
+                        dt <- dt_model[prefix %in% ngrams, head(.SD, topN), by=.(ngramlength, prefix)]
+                        
+                        return(unique(dt[, .(nextword)]))
+                }
         }
         else {
-                # subset the data and return the topN from reach ngram type
+                # subset the data and return the topN from reach ngram type for a list of predicted words
+                # used this version to evaluate quiz questions where the next word options were provided
+                # in the context of a multiple choice question.
                 return(dt_model[nextword %in% nextWord & prefix %in% unlist(ngrams), head(.SD, topN), by=.(ngramlength, prefix)])
         }
 
@@ -96,6 +113,9 @@ queryModelNextWord <- function(phrase, topN=3, nextWord = NULL) {
         
 }
 
-
+# num_bigrams <- nrow(dt_model[ngramlength == 2])
+# dt_model_unigram <- dt_model[ngramlength == 2, .(completes = .N/num_bigrams, ngramlength = 1) , by=.(nextword)]
+# A[B, bb:=i.b, on='a']
+# dt_model[dt_model_unigram, Pcont:=i.completes, on = c('ngramlength', 'nextword')]
 
 
