@@ -52,9 +52,9 @@ calcNgramProb <- function(myDfm, ngramLength = 2) {
         # group rows by the condition, add conditional probability column, then sort
         #df <- df %>% group_by_(.dots = LETTERS[1:ngramLength - 1]) %>% mutate_(.dots = setNames(dots.mutate, NgramProb.colName)) %>% arrange_(.dots = c(LETTERS[1:ngramLength - 1], NgramProb.colName.desc))
         #df <- df %>% group_by(prefix) %>% mutate_(.dots = setNames(dots.mutate, "probability")) 
-        df <- df %>% group_by(prefix) %>% mutate(probability = freq/sum(freq), ngramlength=ngramLength) %>% 
+        df <- df %>% group_by(prefix) %>% mutate(probability = freq/sum(freq), nwordtypes = n(), ngramlength=ngramLength) %>% 
                 arrange(prefix, desc(probability)) %>% rename_(.dots = setNames(LETTERS[ngramLength], "nextword")) %>%
-                select(prefix, nextword, probability, ngramlength)
+                select(prefix, nextword, probability, ngramlength, freq, nwordtypes)
         View(df)
         dt <- as.data.table(df)
         View(dt)
@@ -113,9 +113,40 @@ queryModelNextWord <- function(phrase, topN=3, nextWord = NULL, verbose = TRUE) 
         
 }
 
-# num_bigrams <- nrow(dt_model[ngramlength == 2])
-# dt_model_unigram <- dt_model[ngramlength == 2, .(completes = .N/num_bigrams, ngramlength = 1) , by=.(nextword)]
-# A[B, bb:=i.b, on='a']
-# dt_model[dt_model_unigram, Pcont:=i.completes, on = c('ngramlength', 'nextword')]
+# Apply Modified Kneser-Ney smoothing to dt_model object
+# Assumes model is built and loaded into the environment
+applyKneserNeySmoothing <- function() {
+        
+        # Get discounting factors - will build out true calculations later
+        # for now using these made up constants
+        D1 <- .4
+        #D.2 == .5
+        #D.3.plus == .75
+        
+        # Step 1: Calculate lowest order unigram probabilities
+        # Pkn(w) = number of bigrams w completes / total number of bigrams
+        
+        # total number of bigrams in the model
+        num_bigrams <- nrow(dt_model[ngramlength == 2])
+        # conditional probability
+        dt_model_unigram <- dt_model[ngramlength == 2, .(completes = .N/num_bigrams, ngramlength = 1) , by=.(nextword)]
+        # update model
+        dt_model[dt_model_unigram, Pkn:=i.completes, on = c('ngramlength', 'nextword')]
+        
+        # Step 2: Calucate bigram probabilities
+        # Pkn(wi|wi-1) = max()....
+        #setkey(df1, lsr, ppr)
+        #setkey(df2, li, pro)
+        #df1[df2, alpha := i.alpha]
+        dt_model_unigram <- dt_model[ngramlength == 1, .(nextword, freq, ngramlength = ngramlength + 1)]
+        print(head(dt_model_unigram))
+        setkey(dt_model_unigram, nextword, ngramlength)
+        setkey(dt_model, prefix, ngramlength)
+        dt_model[dt_model_unigram, Pkn:=(freq-D1)/i.freq]
+        print(head(dt_model, 15))
+        
+        
+}
+
 
 
