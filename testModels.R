@@ -34,7 +34,7 @@ calcAccuracyEntropy <- function(test.phrase, max.ngram.length = 4) {
                                 correct.tally <- correct.tally + 1
                         }
                         
-                        cross.entropy.tally <- cross.entropy.tally - log(dt_result[1, probability])
+                        cross.entropy.tally <- cross.entropy.tally - log(dt_result[1, Pkn])
                 }
                 
         }

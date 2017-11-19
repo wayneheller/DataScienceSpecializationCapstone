@@ -94,11 +94,13 @@ queryModelNextWord <- function(phrase, topN=3, nextWord = NULL, verbose = TRUE) 
         if (is.null(nextWord)) {
                 # subset the data and return the topN from each ngram type
                 if (verbose == TRUE){
-                        return(dt_model[prefix %in% ngrams, head(.SD, topN), by=.(ngramlength, prefix)])   
+                        #return(dt_model[prefix %in% ngrams, head(.SD, topN), by=.(ngramlength, prefix)])  
+                        dt <-  dt_model[prefix %in% ngrams, head(.SD, topN), by=.(ngramlength, prefix)]
+                        return(dt[order(-ngramlength, -Pkn)])
                 }
                 else { # just return the next word
                         dt <- dt_model[prefix %in% ngrams, head(.SD, topN), by=.(ngramlength, prefix)]
-                        
+                        dt <- dt[order(-ngramlength, -Pkn)]
                         return(unique(dt[, .(nextword)]))
                 }
         }
@@ -106,7 +108,9 @@ queryModelNextWord <- function(phrase, topN=3, nextWord = NULL, verbose = TRUE) 
                 # subset the data and return the topN from reach ngram type for a list of predicted words
                 # used this version to evaluate quiz questions where the next word options were provided
                 # in the context of a multiple choice question.
-                return(dt_model[nextword %in% nextWord & prefix %in% unlist(ngrams), head(.SD, topN), by=.(ngramlength, prefix)])
+                #return(dt_model[nextword %in% nextWord & prefix %in% unlist(ngrams), head(.SD, topN), by=.(ngramlength, prefix)])
+                dt <- dt_model[nextword %in% nextWord & prefix %in% unlist(ngrams), head(.SD, topN), by=.(ngramlength, prefix)]
+                return(dt[order(-ngramlength, -Pkn)])
         }
 
         
@@ -158,7 +162,7 @@ applyKneserNeySmoothing <- function() {
         dt_model[dt_model_trigram, Pkn:=calcKneserNye(freq, D1, i.freq, nwordtypes, i.Pkn), on = c('ngramlength', 'prefix') ]
         dt_model_trigram <- NULL # Clean up
         
-        # Set the key to be prefix, and order by descending Pkn
+
         
         
 }
@@ -166,11 +170,27 @@ applyKneserNeySmoothing <- function() {
 calcKneserNye <- function(freq, D, i.freq, nwordtypes, i.Pkn) {
         #print(paste(freq, D, i.freq, nwordtypes, i.Pkn))  
         # lapply(num, function(z) {z[3]})
+        D <- unlist(lapply(freq, function(z) {getKneserNyeDiscount(z)}))
+        # print(D)
         max_discount <- lapply((freq - D) / i.freq, function(z) {ifelse(is.na(z), 0, max(z,0))})
         continuation_prob <- lapply(D/i.freq*nwordtypes*i.Pkn, function(z) {ifelse(is.na(z), 0, max(z,0))})
 
         return(list(unlist(max_discount) + unlist(continuation_prob)))
 }
 
+getKneserNyeDiscount <- function(freq) {
+        if (is.na(freq)) {
+                return(0)
+        }
+        if (freq >= 3) {
+                return(D.3)
+                
+                }
+        if (freq == 2) {
+                return(D.2)
+                }
+        
+        return(D.1)
+}
 
 

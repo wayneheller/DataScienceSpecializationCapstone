@@ -25,7 +25,7 @@ loadCorpus <- function(samplefiletype = 'training', sample.size = 0.05) {
                                  testing =  file.path(testingdatadir, samplefilename),
                                  development =  file.path(devdatadir, samplefilename)
         )
-        print(samplefilename)
+        # print(samplefilename)
         
         mySampleFile <- readtext(samplefilename)
         
