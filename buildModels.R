@@ -49,7 +49,8 @@ dt.2 <- calcNgramProb(myDfm, ngramLength = 2)
 myDfm <- getDfm(myCorpus, ngram = 1, unkWords)
 # Threshold parameter set finding natural cutoff point in data, see function 
 # description for more details
-myDfm <- pruneDfm(myDfm, frequencyThreshold = 2)  
+# 11/18 preserving all words to provide basis for Kneser-Nye smoothing
+#myDfm <- pruneDfm(myDfm, frequencyThreshold = 2)
 
 # get dataframe of ngram probabilities
 dt.1 <- calcNgramProb(myDfm, ngramLength = 1)

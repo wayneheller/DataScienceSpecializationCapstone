@@ -55,9 +55,9 @@ calcNgramProb <- function(myDfm, ngramLength = 2) {
         df <- df %>% group_by(prefix) %>% mutate(probability = freq/sum(freq), nwordtypes = n(), ngramlength=ngramLength) %>% 
                 arrange(prefix, desc(probability)) %>% rename_(.dots = setNames(LETTERS[ngramLength], "nextword")) %>%
                 select(prefix, nextword, probability, ngramlength, freq, nwordtypes)
-        View(df)
+        #View(df)
         dt <- as.data.table(df)
-        View(dt)
+        #View(dt)
         
         
         return(dt)
@@ -130,22 +130,46 @@ applyKneserNeySmoothing <- function() {
         num_bigrams <- nrow(dt_model[ngramlength == 2])
         # conditional probability
         dt_model_unigram <- dt_model[ngramlength == 2, .(completes = .N/num_bigrams, ngramlength = 1) , by=.(nextword)]
+        #dt_model_unigram <- dt_model_unigram[ , .(completes = ifelse(is.na(completes), 0, completes), ngramlength, nextword)]
+        #print(dt_model_unigram[nextword=='0.5mm'])
         # update model
         dt_model[dt_model_unigram, Pkn:=i.completes, on = c('ngramlength', 'nextword')]
+        dt_model[ngramlength == 1 & is.na(Pkn), Pkn:=0]
         
         # Step 2: Calucate bigram probabilities
         # Pkn(wi|wi-1) = max()....
-        #setkey(df1, lsr, ppr)
-        #setkey(df2, li, pro)
-        #df1[df2, alpha := i.alpha]
-        dt_model_unigram <- dt_model[ngramlength == 1, .(nextword, freq, ngramlength = ngramlength + 1)]
-        print(head(dt_model_unigram))
-        setkey(dt_model_unigram, nextword, ngramlength)
-        setkey(dt_model, prefix, ngramlength)
-        dt_model[dt_model_unigram, Pkn:=(freq-D1)/i.freq]
-        print(head(dt_model, 15))
+        # create a data table of unigrams to join with model table
+        # for convenience rename the nextword column to prefix because we will be
+        # joining on prefix. increment ngramlength for the same reason--to make the join easier
+        dt_model_unigram <- dt_model[ngramlength == 1 , .(prefix = nextword, freq, ngramlength = ngramlength + 1, nwordtypes, Pkn)]
+        # perform the join and then calculate the Kneser-Nye probability
+        dt_model[dt_model_unigram, Pkn:=calcKneserNye(freq, D1, i.freq, nwordtypes, i.Pkn), on = c('ngramlength', 'prefix') ]
+        dt_model_unigram <- NULL # Clean up
+        
+        # Step 3: Trigrams
+        dt_model_bigram <- dt_model[ngramlength == 2 , .(prefix = paste(prefix, nextword), freq, ngramlength = ngramlength + 1, nwordtypes, Pkn)]
+        #print(head(dt_model_bigram[is.na(Pkn)]))
+        dt_model[dt_model_bigram, Pkn:=calcKneserNye(freq, D1, i.freq, nwordtypes, i.Pkn), on = c('ngramlength', 'prefix') ]
+        dt_model_bigram <- NULL # Clean up
+        
+        # Step 4: Quadgrams
+        dt_model_trigram <- dt_model[ngramlength == 3 , .(prefix = paste(prefix, nextword), freq, ngramlength = ngramlength + 1, nwordtypes, Pkn)]
+        #print(head(dt_model_bigram[is.na(Pkn)]))
+        dt_model[dt_model_trigram, Pkn:=calcKneserNye(freq, D1, i.freq, nwordtypes, i.Pkn), on = c('ngramlength', 'prefix') ]
+        dt_model_trigram <- NULL # Clean up
+        
+        # Set the key to be prefix, and order by descending Pkn
         
         
+}
+
+calcKneserNye <- function(freq, D, i.freq, nwordtypes, i.Pkn) {
+        #print(paste(freq, D, i.freq, nwordtypes, i.Pkn))  
+        # lapply(num, function(z) {z[3]})
+        max_discount <- lapply((freq - D) / i.freq, function(z) {ifelse(is.na(z), 0, max(z,0))})
+        continuation_prob <- lapply(D/i.freq*nwordtypes*i.Pkn, function(z) {ifelse(is.na(z), 0, max(z,0))})
+
+        return(list(unlist(max_discount) + unlist(continuation_prob)))
 }
 
 
