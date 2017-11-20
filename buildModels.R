@@ -101,7 +101,8 @@ dt_model <- dt_model[, .(prefix, nextword, ngramlength, freq, Pkn)]
 
 
 # prune quadgrams and trigrams, remove unigrams
-dt_model <- dt_model[(ngramlength == 4 & freq >= 2) | (ngramlength == 3 & freq >= 2) | ngramlength == 2]
+avg.bigram.Pkn <- mean(unlist(dt_model[ngramlength ==2, .(Pkn)]))
+dt_model <- dt_model[(ngramlength == 4 & freq >= 2) | (ngramlength == 3 & freq >= 2) | (ngramlength == 2 & Pkn >= avg.bigram.Pkn)]
 
 
 # Set the key to be prefix, and order by descending Pkn
@@ -111,4 +112,18 @@ setkey(dt_model, prefix)
 ############################## TEST ACCURACY ###################################
 
 print("Testing...")
-testModel()
+testModel(12345)
+testModel(23456)
+
+############################ PRINT SUMMARY STATS ###############################
+
+print(nrow(dt_model))
+print(nrow(dt_model[ngramlength == 1]))
+print(nrow(dt_model[ngramlength == 2]))
+print(nrow(dt_model[ngramlength == 3]))
+print(nrow(dt_model[ngramlength == 4]))
+
+############################## SAVE MODEL ######################################
+
+print("Saving model to disk...")
+save(dt_model, file='./modellibrary/ngram_model_8.rds')

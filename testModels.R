@@ -47,10 +47,11 @@ calcAccuracyEntropy <- function(test.phrase, max.ngram.length = 4) {
 
 # assumes dt_model, path variables are loaded into the environment
 # Samples testing data set
-testModel <- function() {
+testModel <- function(seedValue) {
         
+        set.seed(seedValue)
         #set.seed(12345)
-        set.seed(23456)
+        #set.seed(23456)
         
         # initialize counters to 0
         number.correct <- 0

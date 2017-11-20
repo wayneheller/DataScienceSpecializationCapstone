@@ -86,10 +86,12 @@ queryModelNextWord <- function(phrase, topN=3, nextWord = NULL, verbose = TRUE) 
         # print(ngrams)
         
         # filter the ngram list to those tokens ending in the last word of the phrase
+        # this has an error in that if the next to last token ends in the last token it
+        # will return extra tokens, e.g. 'the rain in' will return 'the rain' as an n-gram
         toks.pattern <- paste0(toks.last, "$")
-        # print(toks.pattern)
-        ngrams <- tokens_select(ngrams, pattern = toks.pattern, valuetype="regex")
-        # print(ngrams)
+        #print(toks.pattern)
+        ngrams <- tokens_select(ngrams, pattern = toks.pattern, selection='keep', valuetype="regex")
+        #print(ngrams)
         
         if (is.null(nextWord)) {
                 # subset the data and return the topN from each ngram type
