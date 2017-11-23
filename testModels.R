@@ -8,6 +8,7 @@ calcAccuracyEntropy <- function(test.phrase, max.ngram.length = 4) {
         
         correct.tally <- 0
         cross.entropy.tally <- 0
+        querytime.cum <- 0
         
         test.ngrams <- tokens(test.phrase, what = 'word', ngrams = 2:max.ngram.length, concatenator = " ")
         test.ngrams <- unlist(test.ngrams)
@@ -19,7 +20,11 @@ calcAccuracyEntropy <- function(test.phrase, max.ngram.length = 4) {
                 # print(words.prefix)
                 # print(words.in.each.ngram[length(words.in.each.ngram)])
                 
+                query.start <- Sys.time()
                 dt_result <- queryModelNextWord(words.prefix, topN = 1)
+                query.end <- Sys.time()
+                querytime.cum <- querytime.cum + difftime(query.end, query.start, units = "sec")
+                
                 #print(dt_result)
                 if (nrow(dt_result) == 0){
                         # no predictions returned
@@ -41,7 +46,7 @@ calcAccuracyEntropy <- function(test.phrase, max.ngram.length = 4) {
         # print(correct.tally / test.ngrams.length)
         # print(cross.entropy.tally)
         
-        return(c(number.correct = correct.tally, number.tested = test.ngrams.length, cross.entropy.tally = cross.entropy.tally))
+        return(c(number.correct = correct.tally, number.tested = test.ngrams.length, cross.entropy.tally = cross.entropy.tally, querytime.cum = querytime.cum))
         
 }
 
@@ -57,6 +62,7 @@ testModel <- function(seedValue) {
         number.correct <- 0
         number.tested <- 0
         cross.entropy.tally <- 0
+        querytime.cum <- 0
         
         # open testing data as a corpus
         myCorpus.test <- loadCorpus(samplefiletype = 'testing', sample.size = 0.05)
@@ -80,6 +86,7 @@ testModel <- function(seedValue) {
                 number.tested <- number.tested + test_results["number.tested"]
                 number.correct <- number.correct + test_results["number.correct"]
                 cross.entropy.tally <- cross.entropy.tally + test_results["cross.entropy.tally"]
+                querytime.cum <- querytime.cum + test_results["querytime.cum"]
         }
         
         
@@ -89,6 +96,12 @@ testModel <- function(seedValue) {
         print(number.correct / number.tested)
         print(cross.entropy.tally)
         print(cross.entropy.tally / number.tested)
+        print(querytime.cum / number.tested)
+        
+        return(c(number.tested,
+               number.correct,
+               cross.entropy.tally,
+               querytime.cum))
 
         
         

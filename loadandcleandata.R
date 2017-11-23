@@ -114,5 +114,29 @@ identifyLowFreqTerms <- function(myCorpus, lowfreq=1){
         return(lowfreqterms)
 }
 
+getSampleSize <- function(sampleDir) {
+        if (file.exists(file.path(sampleDir, "sampledata_samplesize_0.01.txt"))) {
+                sample.size <- "1%"
+        }
+        if (file.exists(file.path(sampleDir, "sampledata_samplesize_0.1.txt"))) {
+                sample.size <- "10%"
+        }
+        if (file.exists(file.path(sampleDir, "sampledata_samplesize_0.05.txt"))) {
+                sample.size <- "5%"
+        }
+        else sample.size <- "Unknown"
+        
+        return(sample.size)
+}
 
+# This function removes non-breaking spaces ascii character 160
+# The trimws() function does not handle these
+# Used by cleanCorpus() in the preparation of the banned words file
+removenbsp <- function(x) {
+        return(gsub(chr(160), "", x, fixed = TRUE))
+}
+
+# helper function to convert an ascii code to its character
+#used by cleanCorpus()
+chr <- function(n) { rawToChar(as.raw(n)) }
 ## ----end-preprocessingqanteda
