@@ -150,7 +150,7 @@ createSampleData <- function(datadir, sample.size, samplefiletype) {
                                  development =  devdatadir
         )
         
-        archive.sample(dirtoarchive)
+        #archive.sample(dirtoarchive)
         
         # Create sample for each source file
         print("Creating blog sample...")
@@ -174,7 +174,7 @@ createSampleData <- function(datadir, sample.size, samplefiletype) {
         # for more info
 #        print("Opening Sample Directory as VCorpus...")
 #        myCorpus <- VCorpus(DirSource(sampleDir, encoding = "UTF-8", mode="binary"),
-                           readerControl = list(language = "lat"))
+#                           readerControl = list(language = "lat"))
 
         # add meta data tag
 #        print("Adding meta data tag...")

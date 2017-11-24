@@ -1,5 +1,7 @@
 # To Test Accuracy and Cross Entropy of Models
 
+library(tm)
+
 # Performs calcuation on 1 sentence
 # assumes dt_model has been loaded into the environment
 calcAccuracyEntropy <- function(test.phrase, max.ngram.length = 4) {
