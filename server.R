@@ -13,9 +13,10 @@ library(data.table)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
+    #output$loadmsg <- renderText({"Be Patient While Data Loads..."})
     withProgress(message = "Loading phrase dictionary...Please Wait",  {
         # Read summarized ngram information into object dt_model
-        load("ngram_model.rds")
+        load("ngram_model_shiny.rds")
     } )
         
 

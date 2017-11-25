@@ -29,7 +29,7 @@ NextWord is a new word prediction application that allows you to predict your ne
 
 Behind and intuitive user interface, NextWord uses twitter, blog and news article data provided by SwiftKey.  The configurable build system, samples, processes, analyzes, creates, and evaluates its models.  Using advanced natural language processing techniques such as Modified Kneser-Nye smoothing, NextWord delivers accuracy and blazing fast performance.
 
-![NextWord UI](FlightExplorer.PNG)
+![NextWord UI](nextword.PNG)
 
 ---
 
@@ -43,13 +43,15 @@ modeldocfilename <- 'model_documenation.csv'
 
 f.path <- file.path(modellibrarydir, modeldocfilename)
 df <- read.csv(f.path)
-df.perf <- df %>% select( model.filesize, model.ngramcount.total, model.perforamance.avgoverallaccuracy, model.performance.avgquerytime) %>% arrange(desc(model.filesize))
+df.perf <- df %>% select( model.filesize, model.ngramcount.total, model.performance.avgoverallaccuracy, model.performance.avgtop3accuracy, model.performance.avgquerytime) %>% arrange(desc(model.filesize))
 
-df.perf$model.perforamance.avgoverallaccuracy <- df.perf$model.perforamance.avgoverallaccuracy * 100
+df.perf$model.performance.avgoverallaccuracy <- df.perf$model.performance.avgoverallaccuracy * 100
+df.perf$model.performance.avgtop3accuracy <- df.perf$model.performance.avgtop3accuracy * 100
+
 df.perf$model.performance.avgquerytime <- df.perf$model.performance.avgquerytime * 1000
 
-table.names <- c('File Size (Mb)', 'NGrams', 'Overall Accuracy %', 'Average Query Time (msec)')
-table.align <- c('l', 'r', 'r', 'r')
+table.names <- c('File Size (Mb)', 'NGrams', 'Next Word Accuracy %', 'In Top 3 Words Accuracy %', 'Average Query Time (msec)')
+table.align <- c('l', 'r', 'r', 'r', 'r')
 kable(df.perf, format='html', digits = 1 , row.names = NA, col.names = table.names, align = table.align, 
     caption = NULL, format.args = list(big.mark = ","), escape = TRUE)
 

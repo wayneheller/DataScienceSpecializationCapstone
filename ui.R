@@ -18,9 +18,10 @@ shinyUI(fluidPage(
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(
-        h4("Instructions:"),
-        h5("Step 0: Be Patient While Data Loads."),
-        p("You should see a progress message in the lower right corner.  If not, you may need to reload this page."),
+        #h4("Instructions:"),
+        #h5("Be Patient While Data Loads."),
+        #textOutput("loadmsg"),
+        #p("You should see a progress message in the lower right corner.  If not, you may need to reload this page."),
   
         uiOutput("phrase")
 

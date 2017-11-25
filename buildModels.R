@@ -11,11 +11,12 @@
 # Build Configuration Parameters
 
 model.date <- Sys.Date()
-model.filename <- 'ngram_model_13.rds'     # not yet self incrementing
+model.filename <- 'ngram_model_20.rds'     # not yet self incrementing
 model.filesize <- 0                        # to be calculated
 model.threshold.quadgram <- 2              # low frequency threshold
-model.threshold.trigram <- 2               # low frequency threshold
-model.threshold.bigram <- 2                # low frequency threshold
+model.threshold.trigram <- 1               # low frequency threshold
+#model.threshold.bigram <- "Above Average continuation probability"                # low frequency threshold
+model.threshold.bigram <- 1
 model.threshold.unigram <- NA              # low frequency threshold
 model.ngramcount.total <- 0                # To be calculated
 model.ngramcount.quadgrams <- 0            # To be calculated
@@ -23,8 +24,10 @@ model.ngramcount.trigrams <- 0             # To be calculated
 model.ngramcount.bigrams <- 0              # To be calculated
 model.ngramcount.unigrams <- 0             # To be calculated
 model.smoothing <- 'Modified Kneser-Nye'
-model.perforamance.avgoverallaccuracy <- 0 # to be calculated
-model.performance.avgcrossentropy <- 0        # to be calculated
+model.performance.avgoverallaccuracy <- 0  # to be calculated
+model.performance.avgtop3accuracy <- 0     # to be calculated
+model.performance.avgcrossentropy <- 0     # to be calculated
+model.performance.avgtop3crossentropy <- 0 # to be calculated
 model.performance.avgquerytime <- 0        # to be calculated
 
 # sample.size - should make this drive sample file selection, is just a pass 
@@ -161,10 +164,18 @@ testResults.2 <- testModel(23456)
 
 number.tested.total <- testResults.1["number.tested"] + testResults.2["number.tested"]
 number.correct.total <- testResults.1["number.correct"] + testResults.2["number.correct"]
-model.perforamance.avgoverallaccuracy <- number.correct.total / number.tested.total
+number.correct.top3.total <- testResults.1["number.correct.top3"] + testResults.2["number.correct.top3"]
+
+model.performance.avgoverallaccuracy <- number.correct.total / number.tested.total
+model.performance.avgtop3accuracy <- number.correct.top3.total / number.tested.total
+
 model.performance.avgcrossentropy <- (testResults.1["cross.entropy.tally"] +
                                    testResults.2["cross.entropy.tally"] ) /
                                    number.tested.total
+
+model.performance.avgtop3crossentropy <- (testResults.1["cross.entropy.tally.top3"] +
+                                              testResults.2["cross.entropy.tally.top3"] ) /
+                                              number.tested.total
 
 model.performance.avgquerytime = (testResults.1["querytime.cum"] + testResults.2["querytime.cum"]) / number.tested.total
 
@@ -198,8 +209,10 @@ model.data <-  data.frame(model.date = model.date,
                           model.ngramcount.bigrams = model.ngramcount.bigrams, 
                           model.ngramcount.unigrams = model.ngramcount.unigrams,
                           model.smoothing = model.smoothing,
-                          model.perforamance.avgoverallaccuracy = model.perforamance.avgoverallaccuracy,
+                          model.performance.avgoverallaccuracy = model.performance.avgoverallaccuracy,
                           model.performance.avgcrossentropy = model.performance.avgcrossentropy,
-                          model.performance.avgquerytime = model.performance.avgquerytime)
+                          model.performance.avgquerytime = model.performance.avgquerytime,
+                          model.performance.avgtop3accuracy = model.performance.avgtop3accuracy,
+                          model.performance.avgtop3crossentropy = model.performance.avgtop3crossentropy)
 
 write.table(model.data, file = file.path(modellibrarydir, modeldocfilename), row.names = FALSE, append = TRUE, sep = ",", col.names = FALSE)

@@ -9,7 +9,9 @@ calcAccuracyEntropy <- function(test.phrase, max.ngram.length = 4) {
         lambda.error <- .000001 # a error term for 0 count predictions
         
         correct.tally <- 0
+        correct.tally.top3 <-0          # correct word in top 3 predictions
         cross.entropy.tally <- 0
+        cross.entropy.tally.top3 <- 0
         querytime.cum <- 0
         
         test.ngrams <- tokens(test.phrase, what = 'word', ngrams = 2:max.ngram.length, concatenator = " ")
@@ -34,21 +36,41 @@ calcAccuracyEntropy <- function(test.phrase, max.ngram.length = 4) {
                         cross.entropy.tally <- cross.entropy.tally - log(lambda.error)
                 }
                 else {
+                        # NEXT STEP: Modify This Section for Top 3 correct
                         predicted.nextword <- dt_result[1, nextword]
+                        cross.entropy.tally <- cross.entropy.tally - log(dt_result[1, Pkn])
                         # print(predicted.nextword)
-                        if (predicted.nextword == words.in.each.ngram[length(words.in.each.ngram)]) {
+                        correct.nextword <- words.in.each.ngram[length(words.in.each.ngram)]
+                        # first predicted word is correct
+                        if (predicted.nextword == correct.nextword) {
                                 # correct prediction
                                 correct.tally <- correct.tally + 1
+                                
+                                
                         }
                         
-                        cross.entropy.tally <- cross.entropy.tally - log(dt_result[1, Pkn])
+                        # test for accuracy in top 3, handles case where there are only 1 or 2 predictions
+                        predicted.nextword.count <- min(3, nrow(dt_result))
+                        predicted.nextwords <- dt_result[1:predicted.nextword.count, nextword]
+                        if (correct.nextword %in% predicted.nextwords) {
+                                correct.tally.top3 <- correct.tally.top3 + 1
+
+                                # modified the which statement to handle cases where there are duplicate predictions
+                                cross.entropy.tally.top3 <- cross.entropy.tally.top3 - log(dt_result[which(predicted.nextwords == correct.nextword)[1], Pkn])
+                        }
+                        else {
+                                cross.entropy.tally.top3 <- cross.entropy.tally.top3 - log(lambda.error)
+                        }
+                        
+                        
+                        
                 }
                 
         }
         # print(correct.tally / test.ngrams.length)
         # print(cross.entropy.tally)
         
-        return(c(number.correct = correct.tally, number.tested = test.ngrams.length, cross.entropy.tally = cross.entropy.tally, querytime.cum = querytime.cum))
+        return(c(number.correct = correct.tally, number.correct.top3 = correct.tally.top3, number.tested = test.ngrams.length, cross.entropy.tally = cross.entropy.tally, cross.entropy.tally.top3 = cross.entropy.tally.top3, querytime.cum = querytime.cum))
         
 }
 
@@ -61,10 +83,12 @@ testModel <- function(seedValue) {
         #set.seed(23456)
         
         # initialize counters to 0
-        number.correct <- 0
+        number.correct <- 0             # first word correct
+        number.correct.top3 <- 0        # correct word in top 3
         number.tested <- 0
         cross.entropy.tally <- 0
-        querytime.cum <- 0
+        cross.entropy.tally.top3 <- 0
+        querytime.cum <- 0              # total time spent querying the model
         
         # open testing data as a corpus
         myCorpus.test <- loadCorpus(samplefiletype = 'testing', sample.size = 0.05)
@@ -87,22 +111,35 @@ testModel <- function(seedValue) {
                 test_results <- calcAccuracyEntropy(sentence, max.ngram.length = 4)
                 number.tested <- number.tested + test_results["number.tested"]
                 number.correct <- number.correct + test_results["number.correct"]
+                number.correct.top3 <- number.correct.top3 + test_results["number.correct.top3"]
                 cross.entropy.tally <- cross.entropy.tally + test_results["cross.entropy.tally"]
+                cross.entropy.tally.top3 <- cross.entropy.tally.top3 + test_results["cross.entropy.tally.top3"]
                 querytime.cum <- querytime.cum + test_results["querytime.cum"]
         }
         
         
         # print out results
         print(number.tested)
+        
         print(number.correct)
         print(number.correct / number.tested)
+        
+        print(number.correct.top3)
+        print(number.correct.top3 / number.tested)
+        
         print(cross.entropy.tally)
         print(cross.entropy.tally / number.tested)
+        
+        print(cross.entropy.tally.top3)
+        print(cross.entropy.tally.top3 / number.tested)
+        
         print(querytime.cum / number.tested)
         
         return(c(number.tested,
                number.correct,
+               number.correct.top3,
                cross.entropy.tally,
+               cross.entropy.tally.top3,
                querytime.cum))
 
         
