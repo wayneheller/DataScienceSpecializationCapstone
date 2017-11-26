@@ -64,7 +64,7 @@ There is an entire automated infrastructure of Natural Language Processing ready
 
 ## Make Predicting Your Next Word Fast and Easy!
 
-Shiny Application: https://rougeone.shinyapps.io/nextword
+Shiny Application: https://rougeone.shinyapps.io/nextword/
 
 Code Repo:  https://github.com/wayneheller/DataScienceSpecializationCapstone
 
