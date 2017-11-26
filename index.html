@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Next Word Predictor Pitch</title>
+  <title>Flight Explorer Pitch</title>
   <meta charset="utf-8">
-  <meta name="description" content="Next Word Predictor Pitch">
+  <meta name="description" content="Flight Explorer Pitch">
   <meta name="author" content="Wayne Heller">
   <meta name="generator" content="slidify" />
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,7 +14,8 @@
     media="only screen and (max-device-width: 480px)" >
   <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
   <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
-  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
   
   <!-- Grab CDN jQuery, fall back to local if offline -->
   <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
@@ -28,7 +30,18 @@
 <body style="opacity: 0">
   <slides class="layout-widescreen">
     
-
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Flight Explorer Pitch</h1>
+    <h2>Developing Data Products Final Project</h2>
+    <p>Wayne Heller<br/>7/23/2017</p>
+  </hgroup>
+    <a href="https://github.com/wayneheller/FlightExplorerPitch/zipball/gh-pages" class="example">
+     Download
+    </a>
+  <article></article>  
+</slide>
     
 
     <!-- SLIDES -->
@@ -39,9 +52,67 @@
   <article data-timings="">
     <h3>Wouldn&#39;t Be Great If...</h3>
 
-<p>You could build a word prediction application customized to your needs?</p>
+<p>You knew whether your flight was going to be cancelled or delayed BEFORE you booked it?</p>
 
-<p>NextWord is a new word prediction application that allows you to predict your next word based on state of the art prediction algorithms and a flexible system to tune its performance!</p>
+<p>Flight Explorer is a new application that allows you to see the past arrival delays and cancellations of your flight!</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-2" style="background:;">
+  <hgroup>
+    <h2>Using Transit Bureau Data</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Behind and intuitive user interface, Flight Explorer uses transportation bureau data from the prior 12 months to give you the information you need to have delay free travel.</p>
+
+<p><img src="FlightExplorer.PNG" alt="Flight Explorer UI"></p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>Summarized Flight Data</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Individual Files from the Transportation Bureau were consolidated and summarized for use in the application.  See full code in the repository.  Links on last slide.</p>
+
+<pre><code class="r">f.path &lt;- file.path(&quot;..&quot;, &quot;..&quot;, &quot;developingdataproducts&quot;, &quot;final_project&quot;, &quot;FlightExplorer&quot;, &quot;FlightSummaryData.csv&quot; )
+dfFlightSummary &lt;- read.csv(f.path)
+str(dfFlightSummary)
+</code></pre>
+
+<pre><code>## &#39;data.frame&#39;:    1833309 obs. of  8 variables:
+##  $ MONTH           : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ DAY_OF_WEEK     : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ AIRLINE_NAME    : Factor w/ 12 levels &quot;Alaska Airlines Inc.: AS&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ FL_NUM          : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ ORIGIN_CITY_NAME: Factor w/ 315 levels &quot;Aberdeen, SD&quot;,..: 302 273 302 273 302 176 209 273 221 273 ...
+##  $ DEST_CITY_NAME  : Factor w/ 312 levels &quot;Aberdeen, SD&quot;,..: 272 300 272 300 176 300 272 210 272 221 ...
+##  $ avg_delay       : int  16 8 5 28 28 21 17 40 15 0 ...
+##  $ pct_cancelled   : int  0 0 0 0 0 0 0 0 0 0 ...
+</code></pre>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>May All Your Flights be Delay-Free</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Shiny Application <a href="https://rougeone.shinyapps.io/FlightExplorer">https://rougeone.shinyapps.io/FlightExplorer</a></p>
+
+<p>Code Repo:<br>
+<a href="https://github.com/wayneheller/developingdataproducts/tree/gh-pages/final_project/FlightExplorer">https://github.com/wayneheller/developingdataproducts/tree/gh-pages/final_project/FlightExplorer</a></p>
+
+<p>Pitch Deck <a href="https://wayneheller.github.io/FlightExplorerPitch">https://wayneheller.github.io/FlightExplorerPitch</a></p>
+
+<p>Flight Data Source <a href="https://www.transtats.bts.gov/Fields.asp">https://www.transtats.bts.gov/Fields.asp</a></p>
 
   </article>
   <!-- Presenter Notes -->
@@ -55,6 +126,24 @@
       <a href="#" target="_self" rel='tooltip' 
         data-slide=1 title='Introduction'>
          1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='Using Transit Bureau Data'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Summarized Flight Data'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='May All Your Flights be Delay-Free'>
+         4
       </a>
     </li>
   </ul>
