@@ -7,6 +7,8 @@ library(quanteda)
 # Queries model for a phrase
 # returns data.table of top n next work predictions
 queryModelNextWord <- function(dt_model, phrase, topN=3, nextWord = NULL, verbose = TRUE) {
+        # handles case where phrase is blank
+        if (nchar(phrase) == 0) {phrase <- 'the'}
         # get the number of words in the phrase
         #ntoks <- sapply(gregexpr("[A-z]\\W+", phrase), length) + 1L
         
