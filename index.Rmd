@@ -1,42 +1,36 @@
 ---
-title       : Next Word Predictor Pitch
-subtitle    : Data Science Specialization Capstone Project
-author      : Wayne Heller
-job         : 11/23/2017
-framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
-highlighter : highlight.js  # {highlight.js, prettify, highlight}
-hitheme     : tomorrow      # 
-widgets     : []            # {mathjax, quiz, bootstrap}
-mode        : selfcontained # {standalone, draft}
-knit        : slidify::knit2slides
-github      :
-  user: wayneheller
-  repo: DataSpecializationCapstone
+title: "Next Word Predictor Pitch"
+author: "Wayne Heller"
+date: "November 25, 2017"
+output: slidy_presentation
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
 
-## Introduction
 
-### Wouldn't Be Great If...
+## Wouldn't Be Great If...
 
 You could build a word prediction application customized to your needs?
 
 NextWord is a new word prediction application that allows you to predict your next word based on state of the art prediction algorithms and a flexible system to tune its performance!
 
----
 
 ## Using SwiftKey Data & Natural Language Processing
 
-Behind and intuitive user interface, NextWord uses twitter, blog and news article data provided by SwiftKey.  The configurable build system, samples, processes, analyzes, creates, and evaluates its models.  Using advanced natural language processing techniques such as Modified Kneser-Nye smoothing, NextWord delivers accuracy and blazing fast performance.
+Behind and intuitive user interface, NextWord uses twitter, blog and news article data provided by SwiftKey.  The configurable build system, samples, processes, analyzes, creates, and evaluates its models.  
 
-![NextWord UI](nextword.PNG)
+Using advanced natural language processing techniques such as Modified Kneser-Nye smoothing, *NextWord* delivers accuracy and blazing fast performance.
 
----
+![](nextword.PNG)
+
 
 ## Performance Characteristics
 
 ```{r echo=FALSE, eval=TRUE, cache=FALSE, warning=FALSE}
 require(dplyr, warn.conflicts = FALSE, quietly = TRUE)
+require(knitr, warn.conflicts = FALSE, quietly = TRUE)
 
 modellibrarydir <- file.path(getwd(), "modellibrary")
 modeldocfilename <- 'model_documenation.csv'
@@ -52,35 +46,28 @@ df.perf$model.performance.avgquerytime <- df.perf$model.performance.avgquerytime
 
 table.names <- c('File Size (Mb)', 'NGrams', 'Next Word Accuracy %', 'In Top 3 Words Accuracy %', 'Average Query Time (msec)')
 table.align <- c('l', 'r', 'r', 'r', 'r')
-kable(df.perf, format='html', digits = 1 , row.names = NA, col.names = table.names, align = table.align, 
+kable(df.perf, format='html', padding=2, digits = 1 , row.names = NA, col.names = table.names, align = table.align, 
     caption = NULL, format.args = list(big.mark = ","), escape = TRUE)
 
 
 ```
 
----
-
 ## More Than Just An Application
 
 There is an entire automated infrastructure of Natural Language Processing ready to tune the prediction model to fit your needs:
- *  Sampling & pre-processing & smoothing
- *  Configurable tuning parameters
- *  Testing and performance reporting
- *  Self documenting model archive
- 
- 
 
----
+ * Sampling & pre-processing & smoothing  
+ * Configurable tuning parameters  
+ * Testing and performance reporting  
+ * Self documenting model archive  
 
 
 ## Make Predicting Your Next Word Fast and Easy!
 
-Shiny Application https://rougeone.shinyapps.io/FlightExplorer
+Shiny Application: https://rougeone.shinyapps.io/nextword
 
-Code Repo:  
-https://github.com/wayneheller/developingdataproducts/tree/gh-pages/final_project/FlightExplorer
+Code Repo:  https://github.com/wayneheller/DataScienceSpecializationCapstone
 
-Pitch Deck https://wayneheller.github.io/FlightExplorerPitch
+Pitch Deck: https://wayneheller.github.io/DataScienceSpecializationCapstone/
 
----
 
