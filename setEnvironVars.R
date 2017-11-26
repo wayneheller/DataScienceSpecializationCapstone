@@ -23,3 +23,4 @@ modeldocfilename <- 'model_documenation.csv'
 source('testModels.R')
 source('predictprobabilities.R')
 source('loadandcleandata.R')
+source('shiny/queryModel.R')

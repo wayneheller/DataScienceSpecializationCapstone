@@ -25,7 +25,7 @@ calcAccuracyEntropy <- function(test.phrase, max.ngram.length = 4) {
                 # print(words.in.each.ngram[length(words.in.each.ngram)])
                 
                 query.start <- Sys.time()
-                dt_result <- queryModelNextWord(words.prefix, topN = 1)
+                dt_result <- queryModelNextWord(dt_model, words.prefix, topN = 1)
                 query.end <- Sys.time()
                 querytime.cum <- querytime.cum + difftime(query.end, query.start, units = "sec")
                 

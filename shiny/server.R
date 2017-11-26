@@ -10,6 +10,8 @@
 library(shiny)
 library(data.table)
 
+source('queryModel.R')
+
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
@@ -29,7 +31,8 @@ shinyServer(function(input, output) {
                 if (last.char == ' ') {
                         
                         output$data <- renderDataTable({
-                                queryModelNextWord(input$type_phrase, topN = 3, verbose = FALSE)
+                                #head(dt_model)
+                                queryModelNextWord(dt_model, input$type_phrase, topN = 3, verbose = FALSE)
                                 
                                  }, options = list(paging = FALSE, searching = FALSE, info = FALSE),
                                 searchDelay = 1000)
