@@ -12,6 +12,7 @@ knit        : slidify::knit2slides
 github      :
   user: wayneheller
   repo: DataSpecializationCapstone
+  
 ---
 
 
@@ -22,6 +23,7 @@ github      :
 You could build a word prediction application customized to your needs?
 
 NextWord is a new word prediction application that allows you to predict your next word based on state of the art prediction algorithms and a flexible system to tune its performance!
+
 
 ---
 
@@ -59,6 +61,13 @@ Behind and intuitive user interface, NextWord uses twitter, blog and news articl
    <td style="text-align:right;"> 18.4 </td>
    <td style="text-align:right;"> 20.7 </td>
    <td style="text-align:right;"> 19.1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 164.8 </td>
+   <td style="text-align:right;"> 18,543,372 </td>
+   <td style="text-align:right;"> 17.1 </td>
+   <td style="text-align:right;"> 19.1 </td>
+   <td style="text-align:right;"> 17.3 </td>
   </tr>
   <tr>
    <td style="text-align:left;"> 126.5 </td>
@@ -122,5 +131,4 @@ https://github.com/wayneheller/developingdataproducts/tree/gh-pages/final_projec
 
 Pitch Deck https://wayneheller.github.io/FlightExplorerPitch
 
----
 
