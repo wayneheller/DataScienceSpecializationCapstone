@@ -24,7 +24,29 @@ shinyUI(fluidPage(
         #p("You should see a progress message in the lower right corner.  If not, you may need to reload this page."),
   
         uiOutput("phrase"),
-        textOutput("instructions")
+        textOutput("instructions"),
+        p(HTML("&nbsp")),
+        htmlOutput("lblmodelinfo"),
+        htmlOutput("labelngramcount", inline = TRUE),
+        textOutput("ngramcount", inline = TRUE),
+        HTML("</br>"),
+        htmlOutput("labelquadgramcount", inline = TRUE),
+        textOutput("quadgramcount", inline = TRUE),
+        HTML("</br>"),
+        htmlOutput("labeltrigramcount", inline = TRUE),
+        textOutput("trigramcount", inline = TRUE),
+        HTML("</br>"),
+        htmlOutput("labelbigramcount",inline = TRUE),
+        textOutput("bigramcount", inline = TRUE),
+        HTML("</br>"),
+        htmlOutput("labelunigramcount", inline = TRUE),
+        textOutput("unigramcount", inline = TRUE),
+        HTML("</br>"),
+        htmlOutput("labelfilesize", inline = TRUE),
+        textOutput("filesize", inline = TRUE),
+        HTML("</br>"),
+        htmlOutput("labelsmoothing", inline = TRUE),
+        htmlOutput("smoothing", inline = TRUE)
         #p("Start typing then hit space bar for next word prediction")
 
     ),
