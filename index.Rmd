@@ -56,10 +56,10 @@ kable(df.perf, format='html', padding=2, digits = 1 , row.names = NA, col.names 
 
 There is an entire automated infrastructure of Natural Language Processing ready to tune the prediction model to fit your needs:
 
- * Sampling & pre-processing & smoothing  
- * Configurable tuning parameters  
- * Testing and performance reporting  
- * Self documenting model archive  
+ * **Sampling & pre-processing & smoothing** Shiny applications uses quad-, tri-, and bigrams from a 20% sampling of a corpus of articles, blog posts and tweets.  Preprocessing removes profanity, punctuation, numbers and foreign characters.  
+ * **Configurable tuning parameters**  Such as low frequency ngram thresholds provide flexibility to turn model performance and trade-off model size vs. accuracy.  
+ * **Testing and performance reporting**  First-word and In-top-3-word acccuracy calculations as well as mean query time provide ability to compare and contrast model configurations.  
+ * **Self documenting model archive**  Each time a model is built and saved, a csv file is updated with the configuration parameters and performance statistics for future reference.  
 
 
 ## Make Predicting Your Next Word Fast and Easy!
@@ -68,6 +68,8 @@ Shiny Application: https://rougeone.shinyapps.io/nextword/
 
 Code Repo:  https://github.com/wayneheller/DataScienceSpecializationCapstone
 
-Pitch Deck: https://wayneheller.github.io/DataScienceSpecializationCapstone/
+Pitch Deck (github): https://wayneheller.github.io/DataScienceSpecializationCapstone/  
+
+Pitch Deck (rpubs): http://rpubs.com/wgheller/nextword
 
 

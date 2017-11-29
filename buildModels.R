@@ -11,12 +11,12 @@
 # Build Configuration Parameters
 
 model.date <- Sys.Date()
-model.filename <- 'ngram_model_20.rds'     # not yet self incrementing
+model.filename <- 'ngram_model_21.rds'     # not yet self incrementing
 model.filesize <- 0                        # to be calculated
 model.threshold.quadgram <- 2              # low frequency threshold
-model.threshold.trigram <- 1               # low frequency threshold
-#model.threshold.bigram <- "Above Average continuation probability"                # low frequency threshold
-model.threshold.bigram <- 1
+model.threshold.trigram <- 2               # low frequency threshold
+model.threshold.bigram <- "Above Average continuation probability"                # low frequency threshold
+#model.threshold.bigram <- 1
 model.threshold.unigram <- NA              # low frequency threshold
 model.ngramcount.total <- 0                # To be calculated
 model.ngramcount.quadgrams <- 0            # To be calculated
@@ -47,9 +47,9 @@ if (model.full.exists == FALSE)  {
         print("Loading corpus...")
         myCorpus <- loadCorpus(samplefiletype = 'training', sample.size = sample.size)
         # Replace Unigrams with frequency 1 with UNK
-        #unkWords <- identifyLowFreqTerms(myCorpus, lowfreq = 1)
+        unkWords <- identifyLowFreqTerms(myCorpus, lowfreq = 1)
         
-        unkWords <- ""
+        #unkWords <- ""
         
         # Build individual models and then combine
         
@@ -146,11 +146,11 @@ if (model.full.exists == FALSE)  {
 print("Pruning...")
 
 # SPECIAL CASE: Using average continuation probability
-#avg.bigram.Pkn <- mean(unlist(dt_model[ngramlength == 2, .(Pkn)]))
-#dt_model <- dt_model[(ngramlength == 4 & freq >= model.threshold.quadgram) | (ngramlength == 3 & freq >= model.threshold.trigram) | (ngramlength == 2 & Pkn >= avg.bigram.Pkn)]
+avg.bigram.Pkn <- mean(unlist(dt_model[ngramlength == 2, .(Pkn)]))
+dt_model <- dt_model[(ngramlength == 4 & freq >= model.threshold.quadgram) | (ngramlength == 3 & freq >= model.threshold.trigram) | (ngramlength == 2 & Pkn >= avg.bigram.Pkn)]
 
 # DEFAULT CASE: Using ngram threasholds only
-dt_model <- dt_model[(ngramlength == 4 & freq >= model.threshold.quadgram) | (ngramlength == 3 & freq >= model.threshold.trigram) | (ngramlength == 2 & freq >= model.threshold.bigram)]
+#dt_model <- dt_model[(ngramlength == 4 & freq >= model.threshold.quadgram) | (ngramlength == 3 & freq >= model.threshold.trigram) | (ngramlength == 2 & freq >= model.threshold.bigram)]
 
 # Set the key to be prefix, and order by descending Pkn
 dt_model <- dt_model[order(prefix, -ngramlength, -Pkn)]

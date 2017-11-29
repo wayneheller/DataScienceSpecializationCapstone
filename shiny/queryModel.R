@@ -7,8 +7,8 @@ library(quanteda)
 # Queries model for a phrase
 # returns data.table of top n next work predictions
 queryModelNextWord <- function(dt_model, phrase, topN=3, nextWord = NULL, verbose = TRUE) {
-        # handles case where phrase is blank
-        if (nchar(phrase) == 0) {phrase <- 'the'}
+        # handles case where phrase is blank, need to update for <s>
+        if (nchar(trimws(phrase)) == 0) {phrase <- 'the'}
         # get the number of words in the phrase
         #ntoks <- sapply(gregexpr("[A-z]\\W+", phrase), length) + 1L
         
@@ -37,16 +37,42 @@ queryModelNextWord <- function(dt_model, phrase, topN=3, nextWord = NULL, verbos
         
         if (is.null(nextWord)) {
                 # subset the data and return the topN from each ngram type
-                if (verbose == TRUE){
+                #if (verbose == TRUE){
                         #return(dt_model[prefix %in% ngrams, head(.SD, topN), by=.(ngramlength, prefix)])  
-                        dt <-  dt_model[prefix %in% ngrams, head(.SD, topN), by=.(ngramlength, prefix)]
-                        return(dt[order(-ngramlength, -Pkn)])
-                }
-                else { # just return the next word
-                        dt <- dt_model[prefix %in% ngrams, head(.SD, topN), by=.(ngramlength, prefix)]
+                        dt <- dt_model[prefix %in% ngrams , head(.SD, topN), by=.(ngramlength, prefix)]
+                        dt <- dt[nextword != 'unk']
                         dt <- dt[order(-ngramlength, -Pkn)]
-                        return(unique(dt[, .(nextword)]))
-                }
+                        
+                        # if the data table is empty then replace last token with unk and try again
+                        if (nrow(dt) == 0){
+                                # last token replacement
+                                if (ntoks > 1) {
+                                        print(ntoks)
+                                        newphrase <- paste(toks[[1]][1:ntoks-1], collapse = " ")
+                                        newphrase <- paste(newphrase, 'unk')
+                                }
+                                else {newphrase <- 'unk'}
+                
+                                # print(newphrase)
+                                # make call wiht new phrase
+                                return(queryModelNextWord(dt_model, newphrase, topN, nextWord, verbose))
+                        }
+                        else {
+                                if (verbose == TRUE) {
+                                        return(dt[, .(prefix, nextword, Pkn)])   
+                                }
+                                else {
+                                        return(unique(dt[, .(nextword)]))
+                                }
+                        }
+                        
+                #}
+                #else { # just return the next word
+                #        dt <- dt_model[prefix %in% ngrams, head(.SD, topN), by=.(ngramlength, prefix)]
+                #        dt <- dt[nextword != 'unk']
+                #        dt <- dt[order(-ngramlength, -Pkn)]
+                #        return(unique(dt[, .(nextword)]))
+                #}
         }
         else {
                 # subset the data and return the topN from reach ngram type for a list of predicted words

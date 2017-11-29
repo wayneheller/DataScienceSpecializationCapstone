@@ -23,9 +23,16 @@ shinyUI(fluidPage(
         #textOutput("loadmsg"),
         #p("You should see a progress message in the lower right corner.  If not, you may need to reload this page."),
   
-        uiOutput("phrase")
+        uiOutput("phrase"),
+        textOutput("instructions")
+        #p("Start typing then hit space bar for next word prediction")
 
     ),
     # Show a plot of the generated distribution
-    mainPanel(dataTableOutput('data')
+    mainPanel( 
+            htmlOutput("labeltopmatch", inline = TRUE),
+            textOutput("topmatch", inline = TRUE), 
+            p(HTML("&nbsp")),
+            htmlOutput("labelpredictions", inline = FALSE),
+            dataTableOutput('data')
               ))))
