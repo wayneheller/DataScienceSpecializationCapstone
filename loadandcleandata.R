@@ -1,3 +1,14 @@
+################################################################################
+# Coursera|Johns Hopkins Data Science Science Specializaiton|Capstone Project  #
+# October - December 2017                                                      #
+# Wayne Heller                                                                 #
+#                                                                              #
+# Loads the sample file into a corpus object and managers metadata for it      #
+# Creates a document feature matrix                                            # 
+# Includes pruning and cleaning functions                                      #                                                                     #
+#                                                                              #
+################################################################################
+
 ### 10/30/17 switching to Quanteda package
 ### Also installed readtext companion package
 
@@ -7,9 +18,6 @@ library(quanteda)
 library(readtext)
 library(dplyr)
 library(tidyverse)
-
-
-
 
 # loads the sample file and creates a corpus from it
 

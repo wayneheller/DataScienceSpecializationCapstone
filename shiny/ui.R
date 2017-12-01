@@ -1,11 +1,12 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-# 
-#    http://shiny.rstudio.com/
-#
+################################################################################
+# Coursera|Johns Hopkins Data Science Science Specializaiton|Capstone Project  #
+# October - December 2017                                                      #
+# Wayne Heller                                                                 #
+#                                                                              #
+# UI components of shiny application found at:                                 #
+#   https://rougeone.shinyapps.io/nextword/                                    #                                                                  #
+#                                                                              #
+################################################################################
 
 library(shiny)
 
@@ -46,8 +47,13 @@ shinyUI(fluidPage(
         textOutput("filesize", inline = TRUE),
         HTML("</br>"),
         htmlOutput("labelsmoothing", inline = TRUE),
-        htmlOutput("smoothing", inline = TRUE)
-        #p("Start typing then hit space bar for next word prediction")
+        htmlOutput("smoothing", inline = TRUE),
+        HTML("<br>"),
+        HTML("<br>"),
+        htmlOutput("labelspecialtokens", inline = FALSE),
+        htmlOutput("labelunktoken", inline = FALSE),
+        htmlOutput("labelstoken", inline = FALSE)
+        
 
     ),
     # Show a plot of the generated distribution

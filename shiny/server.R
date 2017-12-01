@@ -1,17 +1,18 @@
-#
-# 
-# 
-#
-# 
-# 
-#    
-#
+################################################################################
+# Coursera|Johns Hopkins Data Science Science Specializaiton|Capstone Project  #
+# October - December 2017                                                      #
+# Wayne Heller                                                                 #
+#                                                                              #
+# Server components of shiny application found at:                             #
+#   https://rougeone.shinyapps.io/nextword/                                    #                                                                  #
+#                                                                              #
+################################################################################
 
 library(shiny)
 library(data.table)
 
 source('queryModel.R')
-model.filename <- 'ngram_model_21.rds'
+model.filename <- 'ngram_model_22.rds'
 model.documentation.filename <- 'model_documenation_copy.csv'
 
 df <- read.csv(model.documentation.filename, stringsAsFactors = FALSE)
@@ -46,12 +47,15 @@ shinyServer(function(input, output) {
         output$filesize <- renderText(format(df$model.filesize, big.mark = ","))
         output$labelsmoothing <- renderText(HTML("Smoothing:&nbsp"))
         output$smoothing <- renderText(unlist(df$model.smoothing))
+        output$labelspecialtokens <- renderText(HTML("<b>Special Tokens:</b>"))
+        output$labelunktoken <- renderText("unk = unknown word")
+        output$labelstoken <- renderText("s = start of sentence")
         print(df$model.smoothing)
         # Wait for change in airline selection input to set flight numbers
         observeEvent(input$type_phrase, {
                 last.char <- substr(input$type_phrase, nchar(input$type_phrase),nchar(input$type_phrase))
-                output$topmatch <- renderText('None.')
-                if (last.char == ' ') {
+                #output$topmatch <- renderText('None.')
+                if (last.char == ' ' | nchar(input$type_phrase) == 0) {
                         dt <- queryModelNextWord(dt_model, input$type_phrase, topN = 3, verbose = TRUE)
                         output$topmatch <- renderText(unlist(dt[1, .(nextword)]))
                         output$data <- renderDataTable({

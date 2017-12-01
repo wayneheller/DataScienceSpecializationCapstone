@@ -1,3 +1,13 @@
+################################################################################
+# Coursera|Johns Hopkins Data Science Science Specializaiton|Capstone Project  #
+# October - December 2017                                                      #
+# Wayne Heller                                                                 #
+#                                                                              #
+# This is the main query routine used by shiny application to query            #
+# dt_model for next word predictions                                           # 
+#                                                                              #
+#                                                                              #
+################################################################################
 
 library(dplyr)
 library(data.table)
@@ -6,9 +16,14 @@ library(quanteda)
 # Assumes dt_model has been build
 # Queries model for a phrase
 # returns data.table of top n next work predictions
+# phrase is the prefix to look up
+# topN is the max number of items to return per ngram length
+# nextWord is an optional character vector, if set, it returns the next word
+# probability for each element
+# verbose sets the fields to return.  currently the app uses TRUE
 queryModelNextWord <- function(dt_model, phrase, topN=3, nextWord = NULL, verbose = TRUE) {
         # handles case where phrase is blank, need to update for <s>
-        if (nchar(trimws(phrase)) == 0) {phrase <- 'unk'}
+        if (nchar(trimws(phrase)) == 0) {phrase <- 's'}
         # get the number of words in the phrase
         #ntoks <- sapply(gregexpr("[A-z]\\W+", phrase), length) + 1L
         
@@ -40,7 +55,7 @@ queryModelNextWord <- function(dt_model, phrase, topN=3, nextWord = NULL, verbos
                 #if (verbose == TRUE){
                         #return(dt_model[prefix %in% ngrams, head(.SD, topN), by=.(ngramlength, prefix)])  
                         dt <- dt_model[prefix %in% ngrams , head(.SD, topN), by=.(ngramlength, prefix)]
-                        dt <- dt[nextword != 'unk']
+                        dt <- dt[nextword != 'unk' & nextword != 's']
                         dt <- dt[order(-ngramlength, -Pkn)]
                         
                         # if the data table is empty then replace last token with unk and try again

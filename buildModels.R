@@ -6,12 +6,16 @@
 # Script to build, evaluate and document the prediction model                  #
 # Adjust build configuraiton parameters below before running                   #
 #                                                                              #
+# Be sure to do the following before sourcing:                                 #
+# Update model.filename (increment value)                                      #
+# Adjust model threshold parameters                                            #
+# Validate sample size to draw from                                            #
 ################################################################################
 
 # Build Configuration Parameters
 
 model.date <- Sys.Date()
-model.filename <- 'ngram_model_21.rds'     # not yet self incrementing
+model.filename <- 'ngram_model_22.rds'     # not yet self incrementing
 model.filesize <- 0                        # to be calculated
 model.threshold.quadgram <- 2              # low frequency threshold
 model.threshold.trigram <- 2               # low frequency threshold

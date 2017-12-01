@@ -19,7 +19,7 @@ NextWord is a new word prediction application that allows you to predict your ne
 
 ## Using SwiftKey Data & Natural Language Processing
 
-Behind and intuitive user interface, NextWord uses twitter, blog and news article data provided by SwiftKey.  The configurable build system, samples, processes, analyzes, creates, and evaluates its models.  
+Behind and intuitive user interface, NextWord uses twitter, blog and news article data provided by SwiftKey.  The configurable build system samples, processes, analyzes, creates, and evaluates the prediction model.  
 
 Using advanced natural language processing techniques such as Modified Kneser-Nye smoothing, *NextWord* delivers accuracy and blazing fast performance.
 
@@ -54,11 +54,11 @@ kable(df.perf, format='html', padding=2, digits = 1 , row.names = NA, col.names 
 
 ## More Than Just An Application
 
-There is an entire automated infrastructure of Natural Language Processing ready to tune the prediction model to fit your needs:
+There is an entire automated workflow of natural language processing to tune a prediction model to fit your needs:
 
- * **Sampling & pre-processing & smoothing** Shiny applications uses quad-, tri-, and bigrams from a 20% sampling of a corpus of articles, blog posts and tweets.  Preprocessing removes profanity, punctuation, numbers and foreign characters.  
+ * **Sampling & pre-processing & smoothing** The Shiny applications uses quad-, tri-, and bigrams from a 20% sampling of a corpus of articles, blog posts and tweets.  Preprocessing removes profanity, punctuation, numbers and foreign characters.  
  * **Configurable tuning parameters**  Such as low frequency ngram thresholds provide flexibility to turn model performance and trade-off model size vs. accuracy.  
- * **Testing and performance reporting**  First-word and In-top-3-word acccuracy calculations as well as mean query time provide ability to compare and contrast model configurations.  
+ * **Testing and performance reporting**  Provides First-word and In-top-3-word acccuracy calculations as well as mean query time to compare and contrast model configurations.  
  * **Self documenting model archive**  Each time a model is built and saved, a csv file is updated with the configuration parameters and performance statistics for future reference.  
 
 

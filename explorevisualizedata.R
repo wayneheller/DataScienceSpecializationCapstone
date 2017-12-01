@@ -3,6 +3,9 @@
 # October - December 2017                                                      #
 # Wayne Heller                                                                 #
 #                                                                              #
+# NOTE:  These functions were created early in the development of this project #
+#        and may no longer work since switching from tm to quanteda            #
+#                                                                              #
 # To create a bar plot of top 10 words                                         #
 # > barPlotFreq(myDtm, topN = 10, sample.size = meta(myCorpus)$SampleSize)     #
 #                                                                              #

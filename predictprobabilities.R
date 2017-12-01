@@ -1,3 +1,13 @@
+################################################################################
+# Coursera|Johns Hopkins Data Science Science Specializaiton|Capstone Project  #
+# October - December 2017                                                      #
+# Wayne Heller                                                                 #
+#                                                                              #
+# Used by buildModel script to calculate and smooth probabilities              #
+#                                                                              # 
+#                                                                              #
+#                                                                              #
+################################################################################
 #library(ngram) # 11/1/17 Revised to use Dfm and not Corpus text
 library(dplyr)
 library(data.table)
@@ -13,6 +23,8 @@ library(data.table)
 # names in dplyr
 # NOTE: A how to work with dplyr and variable names is here:
 # https://datascience.blog.wzb.eu/2016/09/27/dynamic-columnvariable-names-with-dplyr-using-standard-evaluation-functions/
+# This function has been modified several times over the course of thie project
+# and it might make sense to rethink the approach and rewrite.
 calcNgramProb <- function(myDfm, ngramLength = 2) {
         # create ngram table
         #ng <- ngram(str, n=ngramLength)   

@@ -1,6 +1,17 @@
-# To Test Accuracy and Cross Entropy of Models
+################################################################################
+# Coursera|Johns Hopkins Data Science Science Specializaiton|Capstone Project  #
+# October - December 2017                                                      #
+# Wayne Heller                                                                 #
+#                                                                              #
+# Script by buildModel script to Test Accuracy and compute Cross Entropy of    #
+# Models                                                                       #
+#                                                                              #
+#                                                                              #
+################################################################################
 
-library(tm)
+
+
+library(tm)  # used for some helper functions only.  
 
 # Performs calcuation on 1 sentence
 # assumes dt_model has been loaded into the environment

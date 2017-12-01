@@ -103,6 +103,8 @@ sampleText <- function (sourcefilename, samplefiletype, totalrows, sample.size) 
                         
                 if(row %in% lineNumber) {
                         # Add 1 line to the sample row set, stripping out the non-ASCII characters
+                        # Add begining of line token <s> to each sample row.
+                        oneLine <- paste('<s>', oneLine)
                         sample <- list(sample, iconv(oneLine, from = "latin1", to="ASCII", sub="")) 
                         print(paste(sourcefilename, row))
                         # increment chunk count
