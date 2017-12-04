@@ -7,8 +7,9 @@ This course is the final project in a series of 10 courses in this specializatio
 *"This course will start with the basics, analyzing a large corpus of text documents to discover the structure in the data and how words are put together. It will cover cleaning and analyzing text data, then building and sampling from a predictive text model. Finally, you will use the knowledge you gained in data products to build a predictive text product you can show off to your family, friends, and potential employers."*
 
 ## Final Deliverables
-[Shiny Application](https://rougeone.shinyapps.io/nextword/)
-[Pitch Deck](http://rpubs.com/wgheller/333875)
+[Shiny Application](https://rougeone.shinyapps.io/nextword/)  
+[Pitch Deck](http://rpubs.com/wgheller/333875)  
+Based on what I observed peer reviewing other learners' submissions, mine is in the zone of average, and there are better examples with superior performance, features and ui/presentation. I'm also not a software developer by trade, so my coding style and approach may not be anything to emulate.  That said, I received 10 of 11 points on the final submission.
 
 ## Advice for Future Students
 As you are now painfully aware, the capstone project is very different than all the classes leading up to it.
