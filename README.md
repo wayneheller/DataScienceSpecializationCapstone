@@ -14,7 +14,7 @@ Based on what I observed peer reviewing other learners' submissions, mine is in 
 ## Advice for Future Students
 As you are now painfully aware, the capstone project is very different than all the classes leading up to it.
 Very little information is provided in the Coursera materials in terms of how to go about solving the word 
-prediction task.  If you are just staring out and are scratching your head, read mentor Len Gretski's post 
+prediction task.  If you are just staring out and are scratching your head, read mentor Len Greski's post 
 [Capstone Strategy](https://github.com/lgreski/datasciencectacontent/blob/master/markdown/capstone-simplifiedApproach.md) and take it to heart.  Here is some additional advice based on my experience:  
 
 + I wasted too much time on the tm package and should have switched to quanteda earlier.  It wasn't until I could not overcome memory issues that I bit the bullet and learned to approach with quanteda library.  Not only is it faster, less memory intensive, it is actually easier to work with.  
